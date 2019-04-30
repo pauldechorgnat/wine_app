@@ -203,7 +203,7 @@ def quiz_grape_color(cepage_id):
 
 @bp.route('/grape_identity_card/<cepage_id>', methods=['GET', 'POST'])
 @login_required
-def identity_card(cepage_id):
+def grape_identity_card(cepage_id):
     cepage = Cepage.query.filter_by(id=cepage_id).first_or_404()
     true_red = cepage.red
     cepage_name = cepage.name
