@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% from "_formhelpers.html" import render_field %}
+
+
+{% block app_content %}
+    <style>
+        .wine-container {
+        height:50%;
+        font-family:Parisienne;
+        font-size:100px;
+        text-align:center;
+        text-weight:bold;
+        }
+        .red-container {
+        display:inline-block;
+        background-color:red;
+        width:45%;
+        font-size:50px;
+        text-align:center;
+        font-family:Arial;
+        height:200px;
+        border-radius:10px;
+        margin:2.5%;
+        text-decoration: none;
+        }
+        .white-container {
+        display:inline-block;
+        background-color:green;
+        width:45%;
+        margin:2.5%;
+        font-size:50px;
+        text-align:center;
+        font-family:Arial;
+        height:200px;
+        border-radius:10px;
+        text-decoration: none;
+        }
+    </style>
+    <link href='http://fonts.googleapis.com/css?family=Parisienne' rel='stylesheet' type='text/css'>
+
+
+        <div class="wine-container">{{ cepage_name }}</div>
+        <div style="font-size:0px;height:50%;">
+            {{ wtf.quick_form(red_form, extra_classes='red-container', method='POST') }}
+            {{ wtf.quick_form(white_form, extra_classes='white-container', method='POST') }}
+        </div>
+{% endblock %}

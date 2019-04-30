@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <link href='http://fonts.googleapis.com/css?family=Parisienne' rel='stylesheet' type='text/css'>
+    <style>
+
+<!--        .main {-->
+<!--        height: 480px;-->
+<!--        width: 800px;-->
+<!--        padding:10px;-->
+<!--        margin:0px;-->
+<!--        }-->
+        .main-frame {
+        height: 100%;
+        width: 100%;
+        border: thin solid black;
+        border-radius:4px;
+        }
+        .header-container {
+        height:100px;
+        font-size:0;
+        margin:0;
+        padding:0;
+        }
+
+        .header-container div {
+        height: 100%;
+        margin:0px;
+        display: inline-block;
+        vertical-align:top;
+        }
+
+        .wine-image-container {
+        width:20%;
+
+        }
+         .wine-image-container img {
+         height: 100px;
+         margin:0px;
+         padding:0px;
+         padding-left:5px;
+        }
+
+        .wine-title {
+        width:60%;
+        font-size:30px;
+        font-family: Parisienne;
+        font-weight: bold;
+        text-align:center;
+        }
+
+        .wine-information {
+        font-size:15px;
+        width:20%;
+        text-align:left;
+        }
+
+        .localisation-container {
+        margin-top:50px;
+        padding-left:20px;
+        }
+        .localisation-container div {
+        margin-top: 15px;
+        }
+        .barre-horizontale {
+        border-bottom: thin solid grey;
+        width:60%;
+        margin-left:20%;
+        margin-top:30px;
+
+        }
+        .remarques-container {
+            margin-top:30px;
+            padding-left:20px;
+        }
+
+        li.remarques {
+       margin:0 0 10px 0;
+    }
+
+
+    </style>
+
+    <div class="main">
+        <div class="main-frame">
+            <div class="header-container">
+                <div class="wine-image-container">
+                    {% if true_red == false %}
+                    <img src="/static/white_wine.api.png">
+                    {% else %}
+                    <img src="/static/red_wine.png">
+                    {% endif %}
+                </div>
+                <div class="wine-title">
+                    <h3>{{ cepage_name }}</h3>
+                </div>
+                <div class="wine-information">
+                    <br>
+                    Superficie: <br>
+                    Monde: {{ cepage_super_monde }} ha<br>
+                    France: {{ cepage_super_fr }} ha
+                </div>
+            </div>
+            <div class="localisation-container">
+                <div class="region-container">Région(s): {{ cepage_region }}</div>
+                <div class="sous-region-container">Sous-Région(s): {{ cepage_ss_region }}</div>
+            </div>
+            <div class="barre-horizontale"></div>
+            <div class="remarques-container">Remarques
+            <ul style="list-style:disc;">
+                <li class="remarques"></li>
+                <li class="remarques"></li>
+                <li class="remarques"></li>
+                <li class="remarques"></li>
+                <li class="remarques"></li>
+
+            </ul>
+            </div>
+
+
+
+        </div>
+    </div>
+{% endblock %}

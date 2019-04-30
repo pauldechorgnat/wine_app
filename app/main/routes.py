@@ -1,0 +1,292 @@
+from datetime import datetime
+from flask import render_template, flash, redirect, url_for, request, g, \
+    jsonify, current_app
+from flask_login import current_user, login_required
+from flask_babel import _, get_locale
+from guess_language import guess_language
+from app import db
+from app.main.forms import EditProfileForm, PostForm, NewGameForm, RedForm, WhiteForm, LeftForm, RightForm
+from app.models import User, Post, Cepage
+from app.translate import translate
+from app.main import bp
+import random
+
+
+@bp.before_app_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.utcnow()
+        db.session.commit()
+    g.locale = str(get_locale())
+
+
+@bp.route('/', methods=['GET', 'POST'])
+@bp.route('/index', methods=['GET', 'POST'])
+@login_required
+def index():
+    form = PostForm()
+    if form.validate_on_submit():
+        language = guess_language(form.post.data)
+        if language == 'UNKNOWN' or len(language) > 5:
+            language = ''
+        post = Post(body=form.post.data, author=current_user,
+                    language=language)
+        db.session.add(post)
+        db.session.commit()
+        flash(_('Your post is now live!'))
+        return redirect(url_for('main.index'))
+    page = request.args.get('page', 1, type=int)
+    posts = current_user.followed_posts().paginate(
+        page, current_app.config['POSTS_PER_PAGE'], False)
+    next_url = url_for('main.index', page=posts.next_num) \
+        if posts.has_next else None
+    prev_url = url_for('main.index', page=posts.prev_num) \
+        if posts.has_prev else None
+    return render_template('index.html', title=_('Home'), form=form,
+                           posts=posts.items, next_url=next_url,
+                           prev_url=prev_url)
+
+
+@bp.route('/explore')
+@login_required
+def explore():
+    page = request.args.get('page', 1, type=int)
+    posts = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page, current_app.config['POSTS_PER_PAGE'], False)
+    next_url = url_for('main.explore', page=posts.next_num) \
+        if posts.has_next else None
+    prev_url = url_for('main.explore', page=posts.prev_num) \
+        if posts.has_prev else None
+    return render_template('index.html', title=_('Explore'),
+                           posts=posts.items, next_url=next_url,
+                           prev_url=prev_url)
+
+
+@bp.route('/user/<username>')
+@login_required
+def user(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    page = request.args.get('page', 1, type=int)
+    posts = user.posts.order_by(Post.timestamp.desc()).paginate(
+        page, current_app.config['POSTS_PER_PAGE'], False)
+    next_url = url_for('main.user', username=user.username,
+                       page=posts.next_num) if posts.has_next else None
+    prev_url = url_for('main.user', username=user.username,
+                       page=posts.prev_num) if posts.has_prev else None
+    return render_template('user.html', user=user, posts=posts.items,
+                           next_url=next_url, prev_url=prev_url)
+
+
+@bp.route('/edit_profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    form = EditProfileForm(current_user.username)
+    if form.validate_on_submit():
+        current_user.username = form.username.data
+        current_user.about_me = form.about_me.data
+        db.session.commit()
+        flash(_('Your changes have been saved.'))
+        return redirect(url_for('main.edit_profile'))
+    elif request.method == 'GET':
+        form.username.data = current_user.username
+        form.about_me.data = current_user.about_me
+    return render_template('edit_profile.html', title=_('Edit Profile'),
+                           form=form)
+
+
+@bp.route('/follow/<username>')
+@login_required
+def follow(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash(_('User %(username)s not found.', username=username))
+        return redirect(url_for('main.index'))
+    if user == current_user:
+        flash(_('You cannot follow yourself!'))
+        return redirect(url_for('main.user', username=username))
+    current_user.follow(user)
+    db.session.commit()
+    flash(_('You are following %(username)s!', username=username))
+    return redirect(url_for('main.user', username=username))
+
+
+@bp.route('/unfollow/<username>')
+@login_required
+def unfollow(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash(_('User %(username)s not found.', username=username))
+        return redirect(url_for('main.index'))
+    if user == current_user:
+        flash(_('You cannot unfollow yourself!'))
+        return redirect(url_for('main.user', username=username))
+    current_user.unfollow(user)
+    db.session.commit()
+    flash(_('You are not following %(username)s.', username=username))
+    return redirect(url_for('main.user', username=username))
+
+
+@bp.route('/translate', methods=['POST'])
+@login_required
+def translate_text():
+    return jsonify({'text': translate(request.form['text'],
+                                      request.form['source_language'],
+                                      request.form['dest_language'])})
+
+
+@bp.route('/new_game', methods=['GET', 'POST'])
+@login_required
+def new_game():
+    form = NewGameForm()
+    if form.validate_on_submit():
+        if form.game_type.data == 'quiz_color':
+
+            flash(_('New game of Color Quiz'))
+            cepage_ids = Cepage.query.with_entities(Cepage.id).all()
+            print(cepage_ids)
+            return redirect(url_for('main.quiz_color', cepage_id=random.choice(cepage_ids)[0]))
+        elif form.game_type.data == 'quiz_region':
+            flash(_('New game of Region Quiz'))
+            cepage_ids = Cepage.query.with_entities(Cepage.id).all()
+            return redirect(url_for('main.quiz_region', cepage_id=random.choice(cepage_ids)[0]))
+
+        else:
+            flash(_('Not implemented yet...'))
+
+    return render_template('new_game.html', title=_('Launch a new game!'), form=form)
+
+
+@bp.route('/quiz_color/<cepage_id>', methods=['GET', 'POST'])
+@login_required
+def quiz_color(cepage_id):
+    random_cepage = Cepage.query.filter_by(id=cepage_id).first_or_404()
+    true_red = random_cepage.red
+    cepage_name = random_cepage.name
+    cepage_id = random_cepage.id
+
+    print(cepage_name)
+    red_form = RedForm(prefix='red_form')
+    white_form = WhiteForm(prefix='white_form')
+
+    if red_form.validate_on_submit():
+        if true_red:
+            flash(_('Right answer'))
+            cepage_ids = Cepage.query.with_entities(Cepage.id).all()
+            return redirect(url_for('main.quiz_color', cepage_id=random.choice(cepage_ids)[0]))
+        else:
+            flash(_('Wrong answer'))
+            post = Post(body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des couleurs !".format(cepage_name),
+                        author=current_user,
+                        language='fr')
+            db.session.add(post)
+            db.session.commit()
+            return redirect(url_for('main.identity_card', cepage_id=cepage_id))
+    if white_form.validate_on_submit():
+        if not true_red:
+            flash(_('Right answer'))
+            cepage_ids = Cepage.query.with_entities(Cepage.id).all()
+            return redirect(url_for('main.quiz_color', cepage_id=random.choice(cepage_ids)[0]))
+        else:
+            flash(_('Wrong answer'))
+            post = Post(body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des couleurs !".format(cepage_name),
+                        author=current_user,
+                        language='fr')
+            db.session.add(post)
+            db.session.commit()
+            return redirect(url_for('main.identity_card', cepage_id=cepage_id))
+    return render_template('red_or_white.html', title='Red or White', cepage_name=cepage_name, red_form=red_form,
+                           white_form=white_form)
+
+
+@bp.route('/identity_card/<cepage_id>', methods=['GET', 'POST'])
+@login_required
+def identity_card(cepage_id):
+    cepage = Cepage.query.filter_by(id=cepage_id).first_or_404()
+    true_red = cepage.red
+    cepage_name = cepage.name
+    cepage_region = cepage.regions
+    cepage_ss_region = cepage.sous_regions
+
+    cepage_super_fr = cepage.superficie_france
+    cepage_super_fr = 'NC' if cepage_super_fr is None else cepage_super_fr
+    cepage_super_monde = cepage.superficie_monde
+    cepage_super_monde = 'NC' if cepage_super_monde is None else cepage_super_monde
+    return render_template('wine_id.html', true_red=true_red, cepage_name=cepage_name,
+                           cepage_super_fr=cepage_super_fr, cepage_super_monde=cepage_super_monde,
+                           cepage_region=cepage_region, cepage_ss_region=cepage_ss_region)
+
+
+@bp.route('/quiz_region/<cepage_id>', methods=['GET', 'POST'])
+@login_required
+def quiz_region(cepage_id):
+    cepage = Cepage.query.filter_by(id=cepage_id).first_or_404()
+    cepage_name = cepage.name
+    cepage_regions = cepage.regions
+
+    list_of_vineyards = [
+        'alsace',
+        'armagnac',
+        'bordeaux',
+        'bourgogne',
+        'champagne',
+        'cognac',
+        'corse',
+        'jura',
+        'languedoc',
+        'loire',
+        'provence',
+        'rhone',
+        'savoie',
+        'sud-ouest',
+    ]
+    list_of_positive_vineyards = []
+    list_of_negative_vineyards = []
+
+    for vignoble in list_of_vineyards:
+        if vignoble in cepage.vignobles:
+            list_of_positive_vineyards.append(vignoble)
+        else:
+            list_of_negative_vineyards.append(vignoble)
+    # si les informations ne sont pas présentes on change de cépage
+    if len(list_of_positive_vineyards) == 0 or len(list_of_negative_vineyards) == 0:
+        cepage_ids = Cepage.query.with_entities(Cepage.id).all()
+        return redirect(url_for('main.quiz_region', cepage_id=random.choice(cepage_ids)[0]))
+    else:
+        positive_vineyard = random.choice(list_of_positive_vineyards)
+        negative_vineyard = random.choice(list_of_negative_vineyards)
+
+        left_vineyard, right_vineyard = random.sample([positive_vineyard, negative_vineyard], k=2)
+
+    left_form = LeftForm()
+    right_form = RightForm()
+    if left_form.validate_on_submit():
+        if left_vineyard == positive_vineyard:
+            flash(_('Right answer'))
+            cepage_ids = Cepage.query.with_entities(Cepage.id).all()
+            return redirect(url_for('main.quiz_region', cepage_id=random.choice(cepage_ids)[0]))
+        else:
+            flash(_('Wrong answer'))
+            post = Post(body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des vignobles !".format(cepage_name),
+                        author=current_user,
+                        language='fr')
+            db.session.add(post)
+            db.session.commit()
+            return redirect(url_for('main.identity_card', cepage_id=cepage_id))
+
+    if right_form.validate_on_submit():
+        if right_vineyard == positive_vineyard:
+            flash(_('Right answer'))
+            cepage_ids = Cepage.query.with_entities(Cepage.id).all()
+            return redirect(url_for('main.quiz_region', cepage_id=random.choice(cepage_ids)[0]))
+        else:
+            flash(_('Wrong answer'))
+            post = Post(body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des vignobles !".format(cepage_name),
+                        author=current_user,
+                        language='fr')
+            db.session.add(post)
+            db.session.commit()
+            return redirect(url_for('main.identity_card', cepage_id=cepage_id))
+
+    return render_template('region_quizz.html', left_vineyard=left_vineyard,
+                           right_vineyard=right_vineyard, cepage_name=cepage_name,
+                           left_form=left_form, right_form=right_form)
