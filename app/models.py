@@ -105,5 +105,16 @@ class Cepage(db.Model):
     red = db.Column(db.Boolean, index=True)
 
 
+class AOC(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(140))
+    vignoble = db.Column(db.String(140))
+    vin_tranquille_blanc = db.Column(db.Boolean, index=True)
+    vin_tranquille_rose = db.Column(db.Boolean, index=True)
+    vin_tranquille_rouge = db.Column(db.Boolean, index=True)
+    vin_effervescent_blanc = db.Column(db.Boolean, index=True)
+    vin_effervescent_rose = db.Column(db.Boolean, index=True)
+    vin_effervescent_rouge = db.Column(db.Boolean, index=True)
+
     def __repr__(self):
-        return '<Cepage {}>'.format(self.name)
+        return '<AOC {}>'.format(self.name)
