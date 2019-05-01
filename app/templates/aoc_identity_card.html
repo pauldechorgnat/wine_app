@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
 {% block app_content %}
-    <link href='http://fonts.googleapis.com/css?family=Parisienne' rel='stylesheet' type='text/css'>
-    <style>
+<link href='http://fonts.googleapis.com/css?family=Parisienne' rel='stylesheet' type='text/css'>
+<style>
 
 <!--        .main {-->
 <!--        height: 480px;-->
@@ -79,34 +79,31 @@
     }
 
 
-    </style>
 
-    <div class="main">
-        <div class="main-frame">
-            <div class="header-container">
-                <div class="wine-image-container">
-                    {% if true_red == false %}
-                    <img src="/static/white_wine.api.png">
-                    {% else %}
-                    <img src="/static/red_wine.png">
-                    {% endif %}
-                </div>
-                <div class="wine-title">
-                    <h3>{{ grape_name }}</h3>
-                </div>
-                <div class="wine-information">
-                    <br>
-                    Superficie: <br>
-                    Monde: {{ grape_super_monde }} ha<br>
-                    France: {{ grape_super_fr }} ha
-                </div>
+</style>
+
+<div class="main">
+    <div class="main-frame">
+        <div class="header-container">
+            <div class="wine-image-container">
+                {% if red == true %}
+                <img src="/static/bottle_red_wine.png">
+                {% endif %}
             </div>
-            <div class="localisation-container">
-                <div class="region-container">Région(s): {{ grape_region }}</div>
-                <div class="sous-region-container">Sous-Région(s): {{ grape_ss_region }}</div>
+            <div class="wine-title">
+                <h3>{{ aoc_name }}</h3>
             </div>
-            <div class="barre-horizontale"></div>
-            <div class="remarques-container">Remarques
+            <div class="wine-image-container">
+                {% if white == true %}
+                <img src="/static/bottle_white_wine.png">
+                {% endif %}
+            </div>
+        </div>
+        <div class="localisation-container">
+            <div class="region-container">Vignoble: {{ aoc_vineyard }}</div>
+        </div>
+        <div class="barre-horizontale"></div>
+        <div class="remarques-container">Remarques
             <ul style="list-style:disc;">
                 <li class="remarques"></li>
                 <li class="remarques"></li>
@@ -115,10 +112,10 @@
                 <li class="remarques"></li>
 
             </ul>
-            </div>
-
-
-
         </div>
+
+
     </div>
+</div>
+
 {% endblock %}
