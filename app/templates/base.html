@@ -23,7 +23,17 @@
                     <img src="/static/bottle_red_wine.png" style="height:30px;margin:0px;padding:0px;">
                 </a></li>
                 <li><a href="{{ url_for('main.index') }}">{{ _('Home') }}</a></li>
-                <li><a href="{{ url_for('main.explore') }}">{{ _('Explore') }}</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Explore
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{{ url_for('main.explore_grapes') }}">Explore Grapes</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{{ url_for('main.explore_aocs') }}">Explore AOCs</a>
+                    </div>
+                </li>
                 <li><a href="{{ url_for('main.new_game') }}">{{ _('New game') }}</a></li>
 
             </ul>
@@ -72,6 +82,8 @@
                 $(destElem).text("{{ _('Error: Could not contact server.') }}");
             });
         }
+
+
 
 
 

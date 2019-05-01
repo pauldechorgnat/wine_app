@@ -48,27 +48,65 @@ def index():
                            posts=posts.items, next_url=next_url,
                            prev_url=prev_url)
 
-
-# @bp.route('/explore')
-# @login_required
-# def explore():
-#     page = request.args.get('page', 1, type=int)
-#     posts = Post.query.order_by(Post.timestamp.desc()).paginate(
-#         page, current_app.config['POSTS_PER_PAGE'], False)
-#     next_url = url_for('main.explore', page=posts.next_num) \
-#         if posts.has_next else None
-#     prev_url = url_for('main.explore', page=posts.prev_num) \
-#         if posts.has_prev else None
-#     return render_template('index.html', title=_('Explore'),
-#                            posts=posts.items, next_url=next_url,
-#                            prev_url=prev_url)
+    # @bp.route('/explore')
+    # @login_required
+    # def explore():
+    page = request.args.get('page', 1, type=int)
+    posts = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page, current_app.config['POSTS_PER_PAGE'], False)
+    next_url = url_for('main.explore', page=posts.next_num) \
+        if posts.has_next else None
+    prev_url = url_for('main.explore', page=posts.prev_num) \
+        if posts.has_prev else None
+    return render_template('index.html', title=_('Explore'),
+                           posts=posts.items, next_url=next_url,
+                           prev_url=prev_url)
 
 
 @bp.route('/explore', methods=['GET', 'POST'])
 @login_required
 def explore():
+    if request.method == 'POST':
+        if request.form['submit-button'] == 'Grapes':
+            return redirect(url_for('main.explore_grapes'))
+        elif request.form['submit-button'] == 'Vineyards':
+            return redirect(url_for('main.explore_vineyards'))
     return render_template('explore.html')
 
+
+@bp.route('/explore_grapes')
+@login_required
+def explore_grapes():
+    page = request.args.get('page', 1, type=int)
+    grapes = Cepage.query.order_by(Cepage.id.asc()).paginate(
+        page, current_app.config['GRAPES_PER_PAGE'], False)
+    print(grapes.items)
+    next_url = url_for('main.explore_grapes', page=grapes.next_num) \
+        if grapes.has_next else None
+    prev_url = url_for('main.explore_grapes', page=grapes.prev_num) \
+        if grapes.has_prev else None
+    return render_template('explore_grapes.html',
+                           title=_('Explore Grapes'),
+                           grapes=grapes.items,
+                           next_url=next_url,
+                           prev_url=prev_url)
+
+
+@bp.route('/explore_aocs')
+@login_required
+def explore_aocs():
+    page = request.args.get('page', 1, type=int)
+    aocs = AOC.query.order_by(AOC.id.asc()).paginate(
+        page, current_app.config['AOC_PER_PAGE'], False)
+    next_url = url_for('main.explore_aocs', page=aocs.next_num) \
+        if aocs.has_next else None
+    prev_url = url_for('main.explore_aocs', page=aocs.prev_num) \
+        if aocs.has_prev else None
+    return render_template('explore_aocs.html',
+                           title=_('Explore AOCs'),
+                           aocs=aocs.items,
+                           next_url=next_url,
+                           prev_url=prev_url)
 
 
 @bp.route('/user/<username>')
