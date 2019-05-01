@@ -276,7 +276,7 @@ def quiz_grape_region(cepage_id):
 
     if request.method == 'POST':
         clicked_is_positive = next(request.form.keys()).replace('.x', '')
-        print(clicked_is_positive)
+
         if clicked_is_positive == 'True':
             flash(_('Right answer'))
             cepage_ids = Cepage.query.with_entities(Cepage.id).all()
@@ -330,14 +330,9 @@ def quiz_aoc_region(aoc_id):
     negative_vineyard = random.choice(list_of_vineyards)
     left_vineyard, right_vineyard = random.sample([positive_vineyard, negative_vineyard], k=2)
 
-    left_form = LeftForm()
-    right_form = RightForm()
-
-    # flash('+ ' + positive_vineyard + ' - ' + negative_vineyard)
-    # flash('< ' + left_vineyard + ' > '+ right_vineyard)
-
-    if left_form.validate_on_submit():
-        if left_vineyard == positive_vineyard:
+    if request.method == 'POST':
+        clicked_is_positive = next(request.form.keys()).replace('.x', '')
+        if clicked_is_positive == 'True':
             flash(_('Right answer'))
             aoc_ids = AOC.query.with_entities(AOC.id).all()
             return redirect(url_for('main.quiz_aoc_region', aoc_id=random.choice(aoc_ids)[0]))
@@ -353,23 +348,9 @@ def quiz_aoc_region(aoc_id):
             aoc_ids = AOC.query.with_entities(AOC.id).all()
             return redirect(url_for('main.quiz_aoc_region', aoc_id=random.choice(aoc_ids)[0]))
 
-    if right_form.validate_on_submit():
-        if right_vineyard == positive_vineyard:
-            flash(_('Right answer'))
-            aoc_ids = AOC.query.with_entities(AOC.id).all()
-            return redirect(url_for('main.quiz_aoc_region', aoc_id=random.choice(aoc_ids)[0]))
-        else:
-            flash(_('Wrong answer'))
-            post = Post(
-                body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des vignobles (AOC) !".format(aoc_name),
-                author=current_user,
-                language='fr')
-            db.session.add(post)
-            db.session.commit()
-            # return redirect(url_for('main.identity_card', cepage_id=aoc_id))
-            aoc_ids = AOC.query.with_entities(AOC.id).all()
-            return redirect(url_for('main.quiz_aoc_region', aoc_id=random.choice(aoc_ids)[0]))
-
-    return render_template('region_quizz.html', left_vineyard=left_vineyard,
-                           right_vineyard=right_vineyard, cepage_name=aoc_name,
-                           left_form=left_form, right_form=right_form)
+    return render_template('region_quizz.html',
+                           left_vineyard=left_vineyard,
+                           right_vineyard=right_vineyard,
+                           cepage_name=aoc_name,
+                           left_is_positive=left_vineyard == positive_vineyard,
+                           right_is_positive=right_vineyard == positive_vineyard)
