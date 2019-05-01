@@ -7,8 +7,8 @@ from flask_login import current_user, login_required
 from flask_babel import _, get_locale
 from guess_language import guess_language
 from app import db
-from app.main.forms import EditProfileForm, PostForm, NewGameForm, RedForm, WhiteForm, LeftForm, RightForm
-from app.models import User, Post, Cepage, AOC
+from app.main.forms import EditProfileForm, PostForm, NewGameForm
+from app.models import User, Post, Cepage, AOC, Game
 from app.translate import translate
 from app.main import bp
 import random
@@ -140,17 +140,26 @@ def translate_text():
 @login_required
 def new_game():
     form = NewGameForm()
+
     if form.validate_on_submit():
+        new_game_ = Game(player_id=current_user.id)
+        db.session.add(new_game_)
+        db.session.commit()
         if form.game_type.data == 'quiz_grape_color':
 
             flash(_('New game of Grape Color Quiz'))
-            cepage_ids = Cepage.query.with_entities(Cepage.id).all()
-            print(cepage_ids)
-            return redirect(url_for('main.quiz_grape_color', cepage_id=random.choice(cepage_ids)[0]))
+            grape_ids = Cepage.query.with_entities(Cepage.id).all()
+            new_game_.game_type = 'Grape Color Quiz'
+            db.session.add(new_game_)
+            db.session.commit()
+
+            return redirect(url_for('main.quiz_grape_color',
+                                    grape_id=random.choice(grape_ids)[0],
+                                    game_id=new_game_.id))
         elif form.game_type.data == 'quiz_grape_region':
             flash(_('New game of Grape Region Quiz'))
-            cepage_ids = Cepage.query.with_entities(Cepage.id).all()
-            return redirect(url_for('main.quiz_grape_region', cepage_id=random.choice(cepage_ids)[0]))
+            grape_ids = Cepage.query.with_entities(Cepage.id).all()
+            return redirect(url_for('main.quiz_grape_region', grape_id=random.choice(grape_ids)[0]))
         elif form.game_type.data == 'quiz_aoc_region':
             flash(_('New game of AOC Region Quiz'))
             aoc_ids = AOC.query.with_entities(AOC.id).all()
@@ -161,66 +170,88 @@ def new_game():
     return render_template('new_game.html', title=_('Launch a new game!'), form=form)
 
 
-@bp.route('/quiz_grape_color/<cepage_id>', methods=['GET', 'POST'])
+def right_answer(game):
+    game.increment_score()
+    db.session.add(game)
+    db.session.commit()
+
+
+def wrong_answer(game):
+    game.is_over = True
+    db.session.add(game)
+    post = Post(
+        body="I just scored {} at {}!".format(game.score, game.game_type),
+        author=current_user,
+        language='en')
+    db.session.add(post)
+    db.session.commit()
+
+
+@bp.route('/quiz_grape_color/<game_id>/<grape_id>', methods=['GET', 'POST'])
 @login_required
-def quiz_grape_color(cepage_id):
-    random_cepage = Cepage.query.filter_by(id=cepage_id).first_or_404()
-    true_red = random_cepage.red
-    cepage_name = random_cepage.name
-    cepage_id = random_cepage.id
+def quiz_grape_color(game_id, grape_id):
+    # getting the game
+    current_game = Game.query.filter_by(id=game_id).first_or_404()
+    if current_game.is_over:
+        return redirect(url_for('main.new_game'))
+
+    # getting the grape
+    random_grape = Cepage.query.filter_by(id=grape_id).first_or_404()
+    true_red = random_grape.red
+    grape_name = random_grape.name
+    grape_id = random_grape.id
 
     if request.method == 'POST':
         if request.form['submit-button'] == 'Red':
             if true_red:
                 flash(_('Right answer'))
-                cepage_ids = Cepage.query.with_entities(Cepage.id).all()
-                return redirect(url_for('main.quiz_grape_color', cepage_id=random.choice(cepage_ids)[0]))
+                right_answer(current_game)
+                grape_ids = Cepage.query.with_entities(Cepage.id).all()
+                return redirect(url_for('main.quiz_grape_color',
+                                        grape_id=random.choice(grape_ids)[0],
+                                        game_id=1))
             else:
                 flash(_('Wrong answer'))
-                post = Post(
-                    body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des couleurs !".format(cepage_name),
-                    author=current_user,
-                    language='fr')
-                db.session.add(post)
-                db.session.commit()
-                return redirect(url_for('main.grape_identity_card', cepage_id=cepage_id))
+                wrong_answer(current_game)
+                return redirect(url_for('main.grape_identity_card',
+                                        grape_id=grape_id))
         elif request.form['submit-button'] == 'White':
 
             if not true_red:
                 flash(_('Right answer'))
-                cepage_ids = Cepage.query.with_entities(Cepage.id).all()
-                return redirect(url_for('main.quiz_grape_color', cepage_id=random.choice(cepage_ids)[0]))
+                right_answer(current_game)
+                grape_ids = Cepage.query.with_entities(Cepage.id).all()
+                return redirect(url_for('main.quiz_grape_color',
+                                        grape_id=random.choice(grape_ids)[0],
+                                        game_id=current_game.id))
             else:
                 flash(_('Wrong answer'))
-                post = Post(
-                    body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des couleurs !".format(cepage_name),
-                    author=current_user,
-                    language='fr')
-                db.session.add(post)
-                db.session.commit()
-                return redirect(url_for('main.grape_identity_card', cepage_id=cepage_id))
+                # this game is over so we update it
+                wrong_answer(current_game)
+
+                return redirect(url_for('main.grape_identity_card', grape_id=grape_id))
         else:
             raise TypeError
     elif request.method == 'GET':
-        return render_template('red_or_white.html', title='Red or White', cepage_name=cepage_name)
+        return render_template('red_or_white.html', title='Red or White', grape_name=grape_name)
 
 
-@bp.route('/grape_identity_card/<cepage_id>', methods=['GET', 'POST'])
+@bp.route('/grape_identity_card/<grape_id>', methods=['GET', 'POST'])
 @login_required
-def grape_identity_card(cepage_id):
-    cepage = Cepage.query.filter_by(id=cepage_id).first_or_404()
-    true_red = cepage.red
-    cepage_name = cepage.name
-    cepage_region = cepage.regions
-    cepage_ss_region = cepage.sous_regions
+def grape_identity_card(grape_id):
+    grape = Cepage.query.filter_by(id=grape_id).first_or_404()
+    true_red = grape.red
+    grape_name = grape.name
+    grape_region = grape.regions
+    grape_ss_region = grape.sous_regions
 
-    cepage_super_fr = cepage.superficie_france
-    cepage_super_fr = 'NC' if cepage_super_fr is None else cepage_super_fr
-    cepage_super_monde = cepage.superficie_monde
-    cepage_super_monde = 'NC' if cepage_super_monde is None else cepage_super_monde
-    return render_template('grape_identity_card.html', true_red=true_red, cepage_name=cepage_name,
-                           cepage_super_fr=cepage_super_fr, cepage_super_monde=cepage_super_monde,
-                           cepage_region=cepage_region, cepage_ss_region=cepage_ss_region)
+    grape_super_fr = grape.superficie_france
+    grape_super_fr = 'NC' if grape_super_fr is None else grape_super_fr
+    grape_super_monde = grape.superficie_monde
+    grape_super_monde = 'NC' if grape_super_monde is None else grape_super_monde
+    return render_template('grape_identity_card.html', true_red=true_red, grape_name=grape_name,
+                           grape_super_fr=grape_super_fr, grape_super_monde=grape_super_monde,
+                           grape_region=grape_region, grape_ss_region=grape_ss_region)
 
 
 def clean_vineyard(vineyard):
@@ -232,13 +263,12 @@ def clean_vineyard(vineyard):
         replace('charentes', 'bordeaux').replace(' ', '')
 
 
-@bp.route('/quiz_grape_region/<cepage_id>', methods=['GET', 'POST'])
+@bp.route('/quiz_grape_region/<grape_id>', methods=['GET', 'POST'])
 @login_required
-def quiz_grape_region(cepage_id):
-    cepage = Cepage.query.filter_by(id=cepage_id).first_or_404()
-    cepage_name = cepage.name
-    cepage_regions = cepage.regions
-    clean_vineyards = clean_vineyard(cepage.vignobles)
+def quiz_grape_region(grape_id):
+    grape = Cepage.query.filter_by(id=grape_id).first_or_404()
+    grape_name = grape.name
+    clean_vineyards = clean_vineyard(grape.vignobles)
     list_of_vineyards = [
         'alsace',
         'armagnac',
@@ -266,8 +296,8 @@ def quiz_grape_region(cepage_id):
 
     # si les informations ne sont pas présentes on change de cépage
     if len(list_of_positive_vineyards) == 0 or len(list_of_negative_vineyards) == 0:
-        cepage_ids = Cepage.query.with_entities(Cepage.id).all()
-        return redirect(url_for('main.quiz_grape_region', cepage_id=random.choice(cepage_ids)[0]))
+        grape_ids = Cepage.query.with_entities(Cepage.id).all()
+        return redirect(url_for('main.quiz_grape_region', grape_id=random.choice(grape_ids)[0]))
     else:
         positive_vineyard = random.choice(list_of_positive_vineyards)
         negative_vineyard = random.choice(list_of_negative_vineyards)
@@ -279,24 +309,24 @@ def quiz_grape_region(cepage_id):
 
         if clicked_is_positive == 'True':
             flash(_('Right answer'))
-            cepage_ids = Cepage.query.with_entities(Cepage.id).all()
-            return redirect(url_for('main.quiz_grape_region', cepage_id=random.choice(cepage_ids)[0]))
+            grape_ids = Cepage.query.with_entities(Cepage.id).all()
+            return redirect(url_for('main.quiz_grape_region', grape_id=random.choice(grape_ids)[0]))
         else:
             flash(_('Wrong answer'))
             post = Post(
-                body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des vignobles !".format(cepage_name),
+                body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des vignobles !".format(grape_name),
                 author=current_user,
                 language='fr')
             db.session.add(post)
             db.session.commit()
-            return redirect(url_for('main.grape_identity_card', cepage_id=cepage_id))
+            return redirect(url_for('main.grape_identity_card', grape_id=grape_id))
     elif request.method == 'GET':
 
         return render_template('region_quizz.html', left_vineyard=left_vineyard,
                                right_vineyard=right_vineyard,
                                left_is_positive=positive_vineyard == left_vineyard,
                                right_is_positive=positive_vineyard == right_vineyard,
-                               cepage_name=cepage_name)
+                               grape_name=grape_name)
 
 
 @bp.route('/quiz_aoc_region/<aoc_id>', methods=['GET', 'POST'])
@@ -344,13 +374,13 @@ def quiz_aoc_region(aoc_id):
                 language='fr')
             db.session.add(post)
             db.session.commit()
-            # return redirect(url_for('main.identity_card', cepage_id=aoc_id))
+            # return redirect(url_for('main.identity_card', grape_id=aoc_id))
             aoc_ids = AOC.query.with_entities(AOC.id).all()
             return redirect(url_for('main.quiz_aoc_region', aoc_id=random.choice(aoc_ids)[0]))
 
     return render_template('region_quizz.html',
                            left_vineyard=left_vineyard,
                            right_vineyard=right_vineyard,
-                           cepage_name=aoc_name,
+                           grape_name=aoc_name,
                            left_is_positive=left_vineyard == positive_vineyard,
                            right_is_positive=right_vineyard == positive_vineyard)

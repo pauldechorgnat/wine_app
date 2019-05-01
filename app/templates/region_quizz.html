@@ -1,6 +1,4 @@
 {% extends "base.html" %}
-{% import 'bootstrap/wtf.html' as wtf %}
-{% from "_formhelpers.html" import render_field %}
 
 
 {% block app_content %}
@@ -22,7 +20,7 @@
         </style>
     <link href='http://fonts.googleapis.com/css?family=Parisienne' rel='stylesheet' type='text/css'>
 
-<div class="wine-container">{{ cepage_name }}</div>
+<div class="wine-container">{{ grape_name }}</div>
 <form style="font-size:0px;" method="POST">
     <input type="image" name="{{ left_is_positive }}" src="/static/vineyards/{{ left_vineyard }}.png" class="image">
     <input type="image" name="{{ right_is_positive }}" src="/static/vineyards/{{ right_vineyard }}.png" class="image">

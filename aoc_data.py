@@ -74,7 +74,7 @@ for index, wine in enumerate(data):
         vin_effervescent_rouge=wine[7] != ''
     )
     db.session.add(aoc)
-    db.session.commit()
+db.session.commit()
 
 
 print(data[:3])
