@@ -169,38 +169,42 @@ def quiz_grape_color(cepage_id):
     cepage_name = random_cepage.name
     cepage_id = random_cepage.id
 
-    print(cepage_name)
-    red_form = RedForm(prefix='red_form')
-    white_form = WhiteForm(prefix='white_form')
+    # print(cepage_name)
+    # red_form = RedForm(prefix='red_form')
+    # white_form = WhiteForm(prefix='white_form')
+    print(request.method)
+    if request.method == 'POST':
+        if request.form['submit-button'] == 'Red':
+            if true_red:
+                flash(_('Right answer'))
+                cepage_ids = Cepage.query.with_entities(Cepage.id).all()
+                return redirect(url_for('main.quiz_grape_color', cepage_id=random.choice(cepage_ids)[0]))
+            else:
+                flash(_('Wrong answer'))
+                post = Post(body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des couleurs !".format(cepage_name),
+                            author=current_user,
+                            language='fr')
+                db.session.add(post)
+                db.session.commit()
+                return redirect(url_for('main.grape_identity_card', cepage_id=cepage_id))
+        elif request.form['submit-button'] == 'White':
 
-    if red_form.validate_on_submit():
-        if true_red:
-            flash(_('Right answer'))
-            cepage_ids = Cepage.query.with_entities(Cepage.id).all()
-            return redirect(url_for('main.quizz_grape_color', cepage_id=random.choice(cepage_ids)[0]))
+            if not true_red:
+                flash(_('Right answer'))
+                cepage_ids = Cepage.query.with_entities(Cepage.id).all()
+                return redirect(url_for('main.quiz_grape_color', cepage_id=random.choice(cepage_ids)[0]))
+            else:
+                flash(_('Wrong answer'))
+                post = Post(body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des couleurs !".format(cepage_name),
+                            author=current_user,
+                            language='fr')
+                db.session.add(post)
+                db.session.commit()
+                return redirect(url_for('main.grape_identity_card', cepage_id=cepage_id))
         else:
-            flash(_('Wrong answer'))
-            post = Post(body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des couleurs !".format(cepage_name),
-                        author=current_user,
-                        language='fr')
-            db.session.add(post)
-            db.session.commit()
-            return redirect(url_for('main.grape_identity_card', cepage_id=cepage_id))
-    if white_form.validate_on_submit():
-        if not true_red:
-            flash(_('Right answer'))
-            cepage_ids = Cepage.query.with_entities(Cepage.id).all()
-            return redirect(url_for('main.quiz_grape_color', cepage_id=random.choice(cepage_ids)[0]))
-        else:
-            flash(_('Wrong answer'))
-            post = Post(body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des couleurs !".format(cepage_name),
-                        author=current_user,
-                        language='fr')
-            db.session.add(post)
-            db.session.commit()
-            return redirect(url_for('main.grape_identity_card', cepage_id=cepage_id))
-    return render_template('red_or_white.html', title='Red or White', cepage_name=cepage_name, red_form=red_form,
-                           white_form=white_form)
+            raise TypeError
+    elif request.method == 'GET':
+        return render_template('red_or_white.html', title='Red or White', cepage_name=cepage_name)
 
 
 @bp.route('/grape_identity_card/<cepage_id>', methods=['GET', 'POST'])

@@ -41,8 +41,8 @@
 
 
         <div class="wine-container">{{ cepage_name }}</div>
-        <div style="font-size:0px;height:50%;">
-            {{ wtf.quick_form(red_form, extra_classes='red-container', method='POST') }}
-            {{ wtf.quick_form(white_form, extra_classes='white-container', method='POST') }}
-        </div>
+        <form style="font-size:0px;height:50%;", method="POST">
+            <input type="submit" name="submit-button" value="Red" class="red-container">
+            <input type="submit" name="submit-button" value="White" class="white-container">
+        </form>
 {% endblock %}
