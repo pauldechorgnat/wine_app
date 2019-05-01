@@ -329,7 +329,8 @@ def grape_identity_card(grape_id):
                            grape_super_fr=grape_super_fr, grape_super_monde=grape_super_monde,
                            grape_region=grape_region, grape_ss_region=grape_ss_region,
                            title=grape_name,
-                           prev_url=prev_url, next_url=next_url)
+                           prev_url=prev_url,
+                           next_url=next_url)
 
 
 @bp.route('/aoc_identity_card/<aoc_id>', methods=['GET', 'POST'])
@@ -338,16 +339,24 @@ def aoc_identity_card(aoc_id):
     aoc = AOC.query.filter_by(id=aoc_id).first_or_404()
     aoc_name = aoc.name
     aoc_vineyard = aoc.vignoble
-    print(aoc_vineyard)
+
     red = aoc.vin_effervescent_rouge or aoc.vin_tranquille_rouge
     white = aoc.vin_effervescent_blanc or aoc.vin_tranquille_blanc
+
+    max_id = AOC.query.order_by(AOC.id.desc()).first().id
+    min_id = AOC.query.order_by(AOC.id.asc()).first().id
+    aoc_id_num = int(aoc_id)
+    next_url = None if max_id == aoc_id_num else url_for('main.aoc_identity_card', aoc_id=aoc_id_num + 1)
+    prev_url = None if min_id == aoc_id_num else url_for('main.aoc_identity_card', aoc_id=aoc_id_num - 1)
 
     return render_template('aoc_identity_card.html',
                            red=red,
                            white=white,
                            aoc_name=aoc_name,
                            aoc_vineyard=aoc_vineyard,
-                           title=aoc_name)
+                           title=aoc_name,
+                           prev_url=prev_url,
+                           next_url=next_url)
 
 
 def clean_vineyard(vineyard):
