@@ -1,5 +1,6 @@
-    <tr>
-        <td>{{ aoc.id }}</td>
-        <td>{{ aoc.name }}</td>
-        <td>{{ aoc.vignoble }}</td>
-    </tr>
+<tr  onclick="window.location='{{ url_for('main.aoc_identity_card', aoc_id=aoc.id) }}'">
+    <td>{{ aoc.id }}</td>
+    <td>{{ aoc.name }}</td>
+    <td>{{ aoc.vignoble }}</td>
+    </a>
+</tr>
