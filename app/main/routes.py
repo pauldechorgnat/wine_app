@@ -309,6 +309,12 @@ def quiz_grape_color(game_id, grape_id):
 @login_required
 def grape_identity_card(grape_id):
     grape = Cepage.query.filter_by(id=grape_id).first_or_404()
+    max_id = Cepage.query.order_by(Cepage.id.desc()).first().id
+    min_id = Cepage.query.order_by(Cepage.id.asc()).first().id
+    grape_id_num = int(grape_id)
+    next_url = None if max_id == grape_id_num else url_for('main.grape_identity_card', grape_id=grape_id_num + 1)
+    prev_url = None if min_id == grape_id_num else url_for('main.grape_identity_card', grape_id=grape_id_num - 1)
+
     true_red = grape.red
     grape_name = grape.name
     grape_region = grape.regions
@@ -318,10 +324,12 @@ def grape_identity_card(grape_id):
     grape_super_fr = 'NC' if grape_super_fr is None else grape_super_fr
     grape_super_monde = grape.superficie_monde
     grape_super_monde = 'NC' if grape_super_monde is None else grape_super_monde
+
     return render_template('grape_identity_card.html', true_red=true_red, grape_name=grape_name,
                            grape_super_fr=grape_super_fr, grape_super_monde=grape_super_monde,
                            grape_region=grape_region, grape_ss_region=grape_ss_region,
-                           title=grape_name)
+                           title=grape_name,
+                           prev_url=prev_url, next_url=next_url)
 
 
 @bp.route('/aoc_identity_card/<aoc_id>', methods=['GET', 'POST'])
