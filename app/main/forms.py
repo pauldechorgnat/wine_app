@@ -35,19 +35,3 @@ class NewGameForm(FlaskForm):
                                      ('quiz_aoc_color', _('AOC Color Quiz')),
                                      ('quiz_aoc_region', _('AOC Region Quiz'))])
     submit = SubmitField(_('Start a game'))
-
-
-class RedForm(FlaskForm):
-    submit = SubmitField(_('Red'))
-
-
-class WhiteForm(FlaskForm):
-    submit = SubmitField(_('White'))
-
-
-class LeftForm(FlaskForm):
-    submit = SubmitField(_('<'))
-
-
-class RightForm(FlaskForm):
-    submit = SubmitField(_('>'))

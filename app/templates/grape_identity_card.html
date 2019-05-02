@@ -92,18 +92,18 @@
                     {% endif %}
                 </div>
                 <div class="wine-title">
-                    <h3>{{ cepage_name }}</h3>
+                    <h3>{{ grape_name }}</h3>
                 </div>
                 <div class="wine-information">
                     <br>
                     Superficie: <br>
-                    Monde: {{ cepage_super_monde }} ha<br>
-                    France: {{ cepage_super_fr }} ha
+                    Monde: {{ grape_super_monde }} ha<br>
+                    France: {{ grape_super_fr }} ha
                 </div>
             </div>
             <div class="localisation-container">
-                <div class="region-container">Région(s): {{ cepage_region }}</div>
-                <div class="sous-region-container">Sous-Région(s): {{ cepage_ss_region }}</div>
+                <div class="region-container">Région(s): {{ grape_region }}</div>
+                <div class="sous-region-container">Sous-Région(s): {{ grape_ss_region }}</div>
             </div>
             <div class="barre-horizontale"></div>
             <div class="remarques-container">Remarques
@@ -121,4 +121,19 @@
 
         </div>
     </div>
+
+    <nav aria-label="...">
+            <ul class="pager">
+                <li class="previous{% if not prev_url %} disabled{% endif %}">
+                    <a href="{{ prev_url or '#' }}">
+                        <span aria-hidden="true">&larr;</span> {{ _('Previous Grape') }}
+                    </a>
+                </li>
+                <li class="next{% if not next_url %} disabled{% endif %}">
+                    <a href="{{ next_url or '#' }}">
+                        {{ _('Next Grape') }} <span aria-hidden="true">&rarr;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
 {% endblock %}
