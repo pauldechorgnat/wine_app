@@ -180,7 +180,7 @@ def quiz_grape_color(cepage_id):
             return redirect(url_for('main.quiz_grape_color', cepage_id=random.choice(cepage_ids)[0]))
         else:
             flash(_('Wrong answer'))
-            post = Post(body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des couleurs !".format(cepage_name),
+            post = Post(body=u"Aie Caramba ! Je me suis encore trompé sur {} au jeu des couleurs !".format(cepage_name),
                         author=current_user,
                         language='fr')
             db.session.add(post)
@@ -193,7 +193,7 @@ def quiz_grape_color(cepage_id):
             return redirect(url_for('main.quiz_grape_color', cepage_id=random.choice(cepage_ids)[0]))
         else:
             flash(_('Wrong answer'))
-            post = Post(body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des couleurs !".format(cepage_name),
+            post = Post(body=u"Aie Caramba ! Je me suis encore trompé sur {} au jeu des couleurs !".format(cepage_name),
                         author=current_user,
                         language='fr')
             db.session.add(post)
@@ -271,7 +271,7 @@ def quiz_grape_region(cepage_id):
             return redirect(url_for('main.quiz_grape_region', cepage_id=random.choice(cepage_ids)[0]))
         else:
             flash(_('Wrong answer'))
-            post = Post(body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des vignobles !".format(cepage_name),
+            post = Post(body=u"Aie Caramba ! Je me suis encore trompé sur {} au jeu des vignobles !".format(cepage_name),
                         author=current_user,
                         language='fr')
             db.session.add(post)
@@ -285,7 +285,7 @@ def quiz_grape_region(cepage_id):
             return redirect(url_for('main.quiz_grape_region', cepage_id=random.choice(cepage_ids)[0]))
         else:
             flash(_('Wrong answer'))
-            post = Post(body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des vignobles !".format(cepage_name),
+            post = Post(body=u"Aie Caramba ! Je me suis encore trompé sur {} au jeu des vignobles !".format(cepage_name),
                         author=current_user,
                         language='fr')
             db.session.add(post)
@@ -306,9 +306,9 @@ def quiz_aoc_region(aoc_id):
     aocs = AOC.query.all()
 
     def clean_vignoble(vignoble):
-        return vignoble.lower().replace('ô', 'o'). \
+        return vignoble.lower().replace(u'ô', 'o'). \
             replace('val de ', '').replace('lorraine', 'champagne'). \
-            replace('vallée du ', '').replace('-roussillon', ''). \
+            replace(u'vallée du ', '').replace('-roussillon', ''). \
             replace('-bugey', '').replace('lyonnais', 'rhone'). \
             replace('beaujolais', 'bourgogne').replace('limousin', 'sud-ouest'). \
             replace('charentes', 'bordeaux').strip()
@@ -350,7 +350,7 @@ def quiz_aoc_region(aoc_id):
         else:
             flash(_('Wrong answer'))
             post = Post(
-                body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des vignobles (AOC) !".format(aoc_name),
+                body=u"Aie Caramba ! Je me suis encore trompé sur {} au jeu des vignobles (AOC) !".format(aoc_name),
                 author=current_user,
                 language='fr')
             db.session.add(post)
@@ -367,7 +367,7 @@ def quiz_aoc_region(aoc_id):
         else:
             flash(_('Wrong answer'))
             post = Post(
-                body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des vignobles (AOC) !".format(aoc_name),
+                body=u"Aie Caramba ! Je me suis encore trompé sur {} au jeu des vignobles (AOC) !".format(aoc_name),
                 author=current_user,
                 language='fr')
             db.session.add(post)
