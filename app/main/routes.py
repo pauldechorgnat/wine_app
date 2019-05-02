@@ -177,7 +177,7 @@ def quiz_grape_color(cepage_id):
         if true_red:
             flash(_('Right answer'))
             cepage_ids = Cepage.query.with_entities(Cepage.id).all()
-            return redirect(url_for('main.quizz_grape_color', cepage_id=random.choice(cepage_ids)[0]))
+            return redirect(url_for('main.quiz_grape_color', cepage_id=random.choice(cepage_ids)[0]))
         else:
             flash(_('Wrong answer'))
             post = Post(body="Aie Caramba ! Je me suis encore trompé sur {} au jeu des couleurs !".format(cepage_name),
