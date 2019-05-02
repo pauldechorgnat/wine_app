@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<style>
+    .explore-container {
+    display:inline-block;
+    background-color:white;
+    width:30%;
+    font-size:50px;
+    text-align:center;
+    font-family:Arial;
+    height:200px;
+    border-radius:10px;
+    margin:10%;
+    text-decoration: none;
+    }
+
+
+
+</style>
+<div class="">Exploration</div>
+
+<form style="font-size:0px;height:20%" method="POST">
+    <input type="submit" name="submit-button" value="Grapes" class="explore-container">
+    <input type="submit" name="submit-button" value="Vineyards" class="explore-container">
+</form>
+
+{% endblock %}

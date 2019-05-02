@@ -90,6 +90,7 @@ class Post(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     language = db.Column(db.String(5))
 
+
     def __repr__(self):
         return '<Post {}>'.format(self.body)
 
@@ -109,12 +110,24 @@ class AOC(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(140))
     vignoble = db.Column(db.String(140))
-    vin_tranquille_blanc = db.Column(db.Boolean, index=True)
-    vin_tranquille_rose = db.Column(db.Boolean, index=True)
-    vin_tranquille_rouge = db.Column(db.Boolean, index=True)
-    vin_effervescent_blanc = db.Column(db.Boolean, index=True)
-    vin_effervescent_rose = db.Column(db.Boolean, index=True)
-    vin_effervescent_rouge = db.Column(db.Boolean, index=True)
+    vin_tranquille_blanc = db.Column(db.Boolean)
+    vin_tranquille_rose = db.Column(db.Boolean)
+    vin_tranquille_rouge = db.Column(db.Boolean)
+    vin_effervescent_blanc = db.Column(db.Boolean)
+    vin_effervescent_rose = db.Column(db.Boolean)
+    vin_effervescent_rouge = db.Column(db.Boolean)
 
     def __repr__(self):
         return '<AOC {}>'.format(self.name)
+
+
+class Game(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    player_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    game_type = db.Column(db.String(140), index=True)
+    score = db.Column(db.Integer, default=0)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    is_over = db.Column(db.Boolean, default=False)
+
+    def increment_score(self):
+        self.score += 1
