@@ -155,7 +155,7 @@ def follow(username):
     if user_ == current_user:
         flash(_('You cannot follow yourself!'))
         return redirect(url_for('main.user', username=username))
-    current_user.follow(user)
+    current_user.follow(user_)
     db.session.commit()
     flash(_('You are following %(username)s!', username=username))
     return redirect(url_for('main.user', username=username))
@@ -296,16 +296,16 @@ def grape_identity_card(grape_id):
     true_red = grape.red
     grape_name = grape.name
     grape_region = grape.regions
-    grape_ss_region = grape.sous_regions
+    departments = grape.departments
 
-    grape_super_fr = grape.superficie_france
-    grape_super_fr = 'NC' if grape_super_fr is None else grape_super_fr
-    grape_super_monde = grape.superficie_monde
-    grape_super_monde = 'NC' if grape_super_monde is None else grape_super_monde
+    grape_area_fr = grape.area_fr
+    grape_area_fr = 'NC' if grape_area_fr is None else grape_area_fr
+    grape_area_world = grape.area_world
+    grape_area_world = 'NC' if grape_area_world is None else grape_area_world
 
     return render_template('grape_identity_card.html', true_red=true_red, grape_name=grape_name,
-                           grape_super_fr=grape_super_fr, grape_super_monde=grape_super_monde,
-                           grape_region=grape_region, grape_ss_region=grape_ss_region,
+                           grape_area_fr=grape_area_fr, grape_area_world=grape_area_world,
+                           grape_region=grape_region, departments=departments,
                            title=grape_name,
                            prev_url=prev_url,
                            next_url=next_url)
@@ -316,7 +316,7 @@ def grape_identity_card(grape_id):
 def aoc_identity_card(aoc_id):
     aoc = AOC.query.filter_by(id=aoc_id).first_or_404()
     aoc_name = aoc.name
-    aoc_vineyard = aoc.vignoble
+    aoc_vineyard = aoc.vineyard
 
     red = aoc.still_red_wineor or aoc.sparkly_red_wine
     white = aoc.still_white_wine or aoc.sparkly_white_wine
@@ -356,7 +356,7 @@ def quiz_grape_region(game_id, grape_id):
 
     grape = Grape.query.filter_by(id=grape_id).first_or_404()
     grape_name = grape.name
-    clean_vineyards = clean_vineyard(grape.vignobles)
+    clean_vineyards = clean_vineyard(grape.vineyards)
     list_of_vineyards = [
         'alsace',
         'armagnac',
@@ -426,7 +426,7 @@ def quiz_aoc_region(game_id, aoc_id):
 
     aoc = AOC.query.filter_by(id=aoc_id).first_or_404()
     aoc_name = aoc.name.split(' ou')[0]
-    aoc_vineyard = aoc.vignoble
+    aoc_vineyard = aoc.vineyard
 
     list_of_vineyards = [
         'alsace',
@@ -521,4 +521,5 @@ def quiz_aoc_color(game_id, aoc_id):
 @bp.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
+
     return "Bonjour le monde"

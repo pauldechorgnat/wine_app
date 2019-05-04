@@ -8,6 +8,8 @@ from app.auth.forms import LoginForm, RegistrationForm, \
     ResetPasswordRequestForm, ResetPasswordForm
 from app.models import User
 from app.auth.email import send_password_reset_email
+import string
+import random
 
 
 @bp.route('/login', methods=['GET', 'POST'])
@@ -26,6 +28,20 @@ def login():
             next_page = url_for('main.index')
         return redirect(next_page)
     return render_template('auth/login.html', title=_('Sign In'), form=form)
+
+
+@bp.route('/login_as_anonymous_user')
+def login_as_anonymous_user():
+    if not current_user.is_authenticated:
+        id = len(User.query.all()) + 1
+        anonymous_user = User(id=id,
+                              username='anonymous user {}'.format(id),
+                              email=''.join(random.sample(string.printable, k=10)))
+        anonymous_user.set_password('')
+        db.session.add(anonymous_user)
+        db.session.commit()
+        login_user(user=anonymous_user)
+    return redirect(url_for('main.index'))
 
 
 @bp.route('/logout')

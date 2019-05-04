@@ -7,7 +7,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 from app import db, login
 
-
 followers = db.Table(
     'followers',
     db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
@@ -43,22 +42,23 @@ class User(UserMixin, db.Model):
         return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
             digest, size)
 
-    def follow(self, user):
-        if not self.is_following(user):
-            self.followed.append(user)
+    def follow(self, user_):
+        if not self.is_following(user_):
+            self.followed.append(user_)
 
-    def unfollow(self, user):
-        if self.is_following(user):
-            self.followed.remove(user)
+    def unfollow(self, user_):
+        if self.is_following(user_):
+            self.followed.remove(user_)
 
-    def is_following(self, user):
+    def is_following(self, user_):
+        print(user_)
         return self.followed.filter(
-            followers.c.followed_id == user.id).count() > 0
+            followers.c.followed_id == user_.id).count() > 0
 
     def followed_posts(self):
         followed = Post.query.join(
             followers, (followers.c.followed_id == Post.user_id)).filter(
-                followers.c.follower_id == self.id)
+            followers.c.follower_id == self.id)
         own = Post.query.filter_by(user_id=self.id)
         return followed.union(own).order_by(Post.timestamp.desc())
 
@@ -90,7 +90,6 @@ class Post(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     language = db.Column(db.String(5))
 
-
     def __repr__(self):
         return '<Post {}>'.format(self.body)
 
@@ -100,9 +99,9 @@ class Grape(db.Model):
     name = db.Column(db.String(140))
     regions = db.Column(db.String(140))
     vineyards = db.Column(db.String(140))
-    sous_regions = db.Column(db.String(140))
-    superficie_france = db.Column(db.Integer)
-    superficie_monde = db.Column(db.Integer)
+    departments = db.Column(db.String(140))
+    area_fr = db.Column(db.Integer)
+    area_world = db.Column(db.Integer)
     red = db.Column(db.Boolean, index=True)
 
 
