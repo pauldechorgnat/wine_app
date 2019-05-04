@@ -80,7 +80,6 @@ def explore_grapes():
     page = request.args.get('page', 1, type=int)
     grapes = Cepage.query.order_by(Cepage.id.asc()).paginate(
         page, current_app.config['GRAPES_PER_PAGE'], False)
-    print(grapes.items)
     next_url = url_for('main.explore_grapes', page=grapes.next_num) \
         if grapes.has_next else None
     prev_url = url_for('main.explore_grapes', page=grapes.prev_num) \
