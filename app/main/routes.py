@@ -97,19 +97,25 @@ def explore_aocs():
 @bp.route('/user/<username>')
 @login_required
 def user(username):
+    # collecting the user
     user = User.query.filter_by(username=username).first_or_404()
+    # colleting his/her games
     games = Game.query.filter_by(player_id=user.id).all()
-    nb_played_games = len(games)
-    games_data = {}
+    games_per_type = {}
     for game_type, game_name in current_app.config['GAMES_TO_NAMES'].items():
-        games_data[game_name] = [game for game in games if game.game_type == game_name]
+        games_per_type[(game_type, game_name)] = [game for game in games if game.game_type == game_type]
 
-    games_data_final = []
-    for game_name, games in games_data.items():
-        if len(games) > 0:
-            games_data_final.append((game_name, len(games), max(games, key=lambda x: x.score).score,
-                                     current_app.config['GAMES_TO_NAMES'].get(game_name)))
-    print(games_data_final)
+    summary_per_type = []
+    for (game_type, game_name), games in games_per_type.items():
+        summary_per_type.append(
+            {
+                'name': game_name,
+                'type': game_type,
+                'nb_played': len(games),
+                'best': max(games, key=lambda x: x.score).score if len(games) > 0 else _('-')
+            }
+        )
+
     page = request.args.get('page', 1, type=int)
     posts = user.posts.order_by(Post.timestamp.desc()).paginate(
         page, current_app.config['POSTS_PER_PAGE'], False)
@@ -118,8 +124,8 @@ def user(username):
     prev_url = url_for('main.user', username=user.username,
                        page=posts.prev_num) if posts.has_prev else None
     return render_template('user.html', user=user, posts=posts.items,
-                           next_url=next_url, prev_url=prev_url, nb_played_games=nb_played_games,
-                           games_data_final=games_data_final)
+                           next_url=next_url, prev_url=prev_url, nb_played_games=len(games),
+                           games_data=summary_per_type)
 
 
 @bp.route('/edit_profile', methods=['GET', 'POST'])
@@ -216,10 +222,9 @@ def wrong_answer(game):
 @bp.route('/quick_new_game/<game_type>')
 @login_required
 def quick_new_game(game_type):
-    if game_type is None:
-        return redirect('main.new_game')
+
     game_name = current_app.config['GAMES_TO_NAMES'][game_type]
-    new_game_ = Game(player_id=current_user.id, game_type=game_name)
+    new_game_ = Game(player_id=current_user.id, game_type=game_type)
     db.session.add(new_game_)
     db.session.commit()
     flash(_('New game of {}'.format(game_name)))
@@ -229,10 +234,11 @@ def quick_new_game(game_type):
         print(random_grape_id)
         print('lol')
         return redirect(url_for('main.{}'.format(game_type), grape_id=random_grape_id[0], game_id=new_game_.id))
-    else:
+    elif 'aoc' in game_type:
         aoc_ids = AOC.query.with_entities(AOC.id).all()
         random_aoc_id = random.choices(aoc_ids)[0]
-        return redirect(url_for('main.{}'.format(game_type, aoc_id=random_aoc_id[0], game_id=new_game_.id)))
+        return redirect(url_for('main.{}'.format(game_type), aoc_id=random_aoc_id[0], game_id=new_game_.id))
+    return redirect('main.new_game')
 
 
 @bp.route('/quiz_grape_color/<game_id>/<grape_id>', methods=['GET', 'POST'])

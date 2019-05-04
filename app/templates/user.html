@@ -23,11 +23,11 @@
         <td>
             <h1>Games played: {{ nb_played_games }}</h1>
             <table class="table table-hover">
-                {% for game in games_data_final %}
-                <tr onclick="window.location='{{ url_for('main.new_game') }}'">
-                    <th>{{ game[0] }}</th>
-                    <td>played : {{ game[1] }}</td>
-                    <td>best: {{ game[2] }}</td>
+                {% for game in games_data %}
+                <tr onclick="window.location='{{ url_for('main.quick_new_game', game_type=game.type) }}'">
+                    <th>{{ game.name }}</th>
+                    <td>played : {{ game.nb_played }}</td>
+                    <td>best: {{ game.best }}</td>
                     {% endfor %}
                 </tr>
             </table>
