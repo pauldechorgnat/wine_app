@@ -1,1 +1,1 @@
-web: gunicorn deploy:app
+web: gunicorn wine_app:app
