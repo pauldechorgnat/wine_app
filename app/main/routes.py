@@ -360,12 +360,12 @@ def aoc_identity_card(aoc_id):
 
 
 def clean_vineyard(vineyard):
-    return vineyard.lower().replace('ô', 'o'). \
-        replace('val de ', '').replace('lorraine', 'champagne'). \
-        replace('vallée du ', '').replace('-roussillon', ''). \
-        replace('-bugey', '').replace('lyonnais', 'rhone'). \
-        replace('beaujolais', 'bourgogne').replace('limousin', 'sud-ouest'). \
-        replace('charentes', 'bordeaux').replace(' ', '')
+    return vineyard.lower().replace(u'ô', 'o'). \
+        replace(u'val de ', '').replace(u'lorraine', 'champagne'). \
+        replace(u'vallée du ', '').replace(u'-roussillon', ''). \
+        replace(u'-bugey', '').replace(u'lyonnais', 'rhone'). \
+        replace(u'beaujolais', 'bourgogne').replace(u'limousin', 'sud-ouest'). \
+        replace(u'charentes', 'bordeaux').replace(u' ', '')
 
 
 @bp.route('/quiz_grape_region/<game_id>/<grape_id>', methods=['GET', 'POST'])
@@ -474,7 +474,7 @@ def quiz_aoc_region(game_id, aoc_id):
     left_vineyard, right_vineyard = random.sample([positive_vineyard, negative_vineyard], k=2)
 
     if request.method == 'POST':
-        clicked_is_positive = next(request.form.keys()).replace('.x', '')
+        clicked_is_positive = next(request.form.keys()).replace(u'.x', '')
         if clicked_is_positive == 'True':
             aoc_ids = AOC.query.with_entities(AOC.id).all()
             right_answer(current_game)
