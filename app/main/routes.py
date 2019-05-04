@@ -7,7 +7,7 @@ from flask_login import current_user, login_required
 from flask_babel import _, get_locale
 from guess_language import guess_language
 from app import db
-from app.main.forms import EditProfileForm, PostForm, NewGameForm
+from app.main.forms import EditProfileForm, PostForm, NewGameForm, EditGrapeForm
 from app.models import User, Post, Grape, AOC, Game, get_player_stats
 from app.translate import translate
 from app.main import bp

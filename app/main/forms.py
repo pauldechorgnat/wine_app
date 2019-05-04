@@ -1,6 +1,6 @@
 from flask import request
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, TextAreaField, SelectField, IntegerField, SelectMultipleField
+from wtforms import StringField, SubmitField, TextAreaField, RadioField, SelectField, BooleanField,IntegerField, SelectMultipleField
 from wtforms.validators import ValidationError, DataRequired, Length
 from flask_babel import _, lazy_gettext as _l
 from app.models import User
@@ -37,9 +37,24 @@ class NewGameForm(FlaskForm):
     submit = SubmitField(_('Start a game'))
 
 
-class EditGrape(FlaskForm):
-    id = IntegerField('ID')
-    name = TextAreaField('name')
-    regions = SelectMultipleField()
+# class EditGrapeForm(FlaskForm):
+#     id = IntegerField('ID')
+#     name = TextAreaField('Name')
+#     regions = SelectField('Regions', choices=[('quiz_grape_color', _('Grape Color Quiz')),
+#                                      ('quiz_grape_region', _('Grape Region Quiz')),
+#                                      ('quiz_aoc_color', _('AOC Color Quiz')),
+#                                      ('quiz_aoc_region', _('AOC Region Quiz'))])
+#     vineyards = RadioField('Vineyards', choices=[('quiz_grape_color', _('Grape Color Quiz')),
+#                                      ('quiz_grape_region', _('Grape Region Quiz')),
+#                                      ('quiz_aoc_color', _('AOC Color Quiz')),
+#                                      ('quiz_aoc_region', _('AOC Region Quiz'))])
+#     departments = SelectMultipleField('Departments', choices=[('quiz_grape_color', _('Grape Color Quiz')),
+#                                      ('quiz_grape_region', _('Grape Region Quiz')),
+#                                      ('quiz_aoc_color', _('AOC Color Quiz')),
+#                                      ('quiz_aoc_region', _('AOC Region Quiz'))])
+#     area_fr = IntegerField('Area in France')
+#     area_world = IntegerField('Area in the world')
+#     red = BooleanField('is red')
+#     submit = SubmitField()
 
 
