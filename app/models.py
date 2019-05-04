@@ -95,11 +95,11 @@ class Post(db.Model):
         return '<Post {}>'.format(self.body)
 
 
-class Cepage(db.Model):
+class Grape(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(140))
     regions = db.Column(db.String(140))
-    vignobles = db.Column(db.String(140))
+    vineyards = db.Column(db.String(140))
     sous_regions = db.Column(db.String(140))
     superficie_france = db.Column(db.Integer)
     superficie_monde = db.Column(db.Integer)
@@ -109,13 +109,13 @@ class Cepage(db.Model):
 class AOC(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(140))
-    vignoble = db.Column(db.String(140))
-    vin_tranquille_blanc = db.Column(db.Boolean)
-    vin_tranquille_rose = db.Column(db.Boolean)
-    vin_tranquille_rouge = db.Column(db.Boolean)
-    vin_effervescent_blanc = db.Column(db.Boolean)
-    vin_effervescent_rose = db.Column(db.Boolean)
-    vin_effervescent_rouge = db.Column(db.Boolean)
+    vineyard = db.Column(db.String(140))
+    still_white_wine = db.Column(db.Boolean)
+    still_rose_wine = db.Column(db.Boolean)
+    still_red_wine = db.Column(db.Boolean)
+    sparkly_white_wine = db.Column(db.Boolean)
+    sparkly_rose_wine = db.Column(db.Boolean)
+    sparkly_red_wine = db.Column(db.Boolean)
 
     def __repr__(self):
         return '<AOC {}>'.format(self.name)

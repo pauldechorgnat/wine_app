@@ -8,7 +8,7 @@ from flask_babel import _, get_locale
 from guess_language import guess_language
 from app import db
 from app.main.forms import EditProfileForm, PostForm, NewGameForm
-from app.models import User, Post, Cepage, AOC, Game
+from app.models import User, Post, Grape, AOC, Game
 from app.translate import translate
 from app.main import bp
 import random
@@ -64,7 +64,7 @@ def explore():
 @login_required
 def explore_grapes():
     page = request.args.get('page', 1, type=int)
-    grapes = Cepage.query.order_by(Cepage.id.asc()).paginate(
+    grapes = Grape.query.order_by(Grape.id.asc()).paginate(
         page, current_app.config['GRAPES_PER_PAGE'], False)
     next_url = url_for('main.explore_grapes', page=grapes.next_num) \
         if grapes.has_next else None
@@ -98,9 +98,9 @@ def explore_aocs():
 @login_required
 def user(username):
     # collecting the user
-    user = User.query.filter_by(username=username).first_or_404()
+    user_ = User.query.filter_by(username=username).first_or_404()
     # colleting his/her games
-    games = Game.query.filter_by(player_id=user.id).all()
+    games = Game.query.filter_by(player_id=user_.id).all()
     games_per_type = {}
     for game_type, game_name in current_app.config['GAMES_TO_NAMES'].items():
         games_per_type[(game_type, game_name)] = [game for game in games if game.game_type == game_type]
@@ -117,13 +117,13 @@ def user(username):
         )
 
     page = request.args.get('page', 1, type=int)
-    posts = user.posts.order_by(Post.timestamp.desc()).paginate(
+    posts = user_.posts.order_by(Post.timestamp.desc()).paginate(
         page, current_app.config['POSTS_PER_PAGE'], False)
-    next_url = url_for('main.user', username=user.username,
+    next_url = url_for('main.user', username=user_.username,
                        page=posts.next_num) if posts.has_next else None
-    prev_url = url_for('main.user', username=user.username,
+    prev_url = url_for('main.user', username=user_.username,
                        page=posts.prev_num) if posts.has_prev else None
-    return render_template('user.html', user=user, posts=posts.items,
+    return render_template('user.html', user=user_, posts=posts.items,
                            next_url=next_url, prev_url=prev_url, nb_played_games=len(games),
                            games_data=summary_per_type)
 
@@ -148,11 +148,11 @@ def edit_profile():
 @bp.route('/follow/<username>')
 @login_required
 def follow(username):
-    user = User.query.filter_by(username=username).first()
-    if user is None:
+    user_ = User.query.filter_by(username=username).first()
+    if user_ is None:
         flash(_('User %(username)s not found.', username=username))
         return redirect(url_for('main.index'))
-    if user == current_user:
+    if user_ == current_user:
         flash(_('You cannot follow yourself!'))
         return redirect(url_for('main.user', username=username))
     current_user.follow(user)
@@ -164,14 +164,14 @@ def follow(username):
 @bp.route('/unfollow/<username>')
 @login_required
 def unfollow(username):
-    user = User.query.filter_by(username=username).first()
-    if user is None:
+    user_ = User.query.filter_by(username=username).first()
+    if user_ is None:
         flash(_('User %(username)s not found.', username=username))
         return redirect(url_for('main.index'))
-    if user == current_user:
+    if user_ == current_user:
         flash(_('You cannot unfollow yourself!'))
         return redirect(url_for('main.user', username=username))
-    current_user.unfollow(user)
+    current_user.unfollow(user_)
     db.session.commit()
     flash(_('You are not following %(username)s.', username=username))
     return redirect(url_for('main.user', username=username))
@@ -223,14 +223,13 @@ def wrong_answer(game):
 @bp.route('/quick_new_game/<game_type>')
 @login_required
 def quick_new_game(game_type):
-
     game_name = current_app.config['GAMES_TO_NAMES'][game_type]
     new_game_ = Game(player_id=current_user.id, game_type=game_type)
     db.session.add(new_game_)
     db.session.commit()
     flash(_('New game of {}'.format(game_name)))
     if 'grape' in game_type:
-        grape_ids = Cepage.query.with_entities(Cepage.id).all()
+        grape_ids = Grape.query.with_entities(Grape.id).all()
         random_grape_id = random.choices(grape_ids)[0]
         print(random_grape_id)
         print('lol')
@@ -251,7 +250,7 @@ def quiz_grape_color(game_id, grape_id):
         return redirect(url_for('main.new_game'))
 
     # getting the grape
-    random_grape = Cepage.query.filter_by(id=grape_id).first_or_404()
+    random_grape = Grape.query.filter_by(id=grape_id).first_or_404()
     true_red = random_grape.red
     grape_name = random_grape.name
     grape_id = random_grape.id
@@ -260,7 +259,7 @@ def quiz_grape_color(game_id, grape_id):
         if request.form['submit-button'] == 'Red':
             if true_red:
                 right_answer(current_game)
-                grape_ids = Cepage.query.with_entities(Cepage.id).all()
+                grape_ids = Grape.query.with_entities(Grape.id).all()
                 return redirect(url_for('main.quiz_grape_color',
                                         grape_id=random.choice(grape_ids)[0],
                                         game_id=current_game.id))
@@ -272,7 +271,7 @@ def quiz_grape_color(game_id, grape_id):
 
             if not true_red:
                 right_answer(current_game)
-                grape_ids = Cepage.query.with_entities(Cepage.id).all()
+                grape_ids = Grape.query.with_entities(Grape.id).all()
                 return redirect(url_for('main.quiz_grape_color',
                                         grape_id=random.choice(grape_ids)[0],
                                         game_id=current_game.id))
@@ -287,9 +286,9 @@ def quiz_grape_color(game_id, grape_id):
 @bp.route('/grape_identity_card/<grape_id>', methods=['GET', 'POST'])
 @login_required
 def grape_identity_card(grape_id):
-    grape = Cepage.query.filter_by(id=grape_id).first_or_404()
-    max_id = Cepage.query.order_by(Cepage.id.desc()).first().id
-    min_id = Cepage.query.order_by(Cepage.id.asc()).first().id
+    grape = Grape.query.filter_by(id=grape_id).first_or_404()
+    max_id = Grape.query.order_by(Grape.id.desc()).first().id
+    min_id = Grape.query.order_by(Grape.id.asc()).first().id
     grape_id_num = int(grape_id)
     next_url = None if max_id == grape_id_num else url_for('main.grape_identity_card', grape_id=grape_id_num + 1)
     prev_url = None if min_id == grape_id_num else url_for('main.grape_identity_card', grape_id=grape_id_num - 1)
@@ -319,8 +318,8 @@ def aoc_identity_card(aoc_id):
     aoc_name = aoc.name
     aoc_vineyard = aoc.vignoble
 
-    red = aoc.vin_effervescent_rouge or aoc.vin_tranquille_rouge
-    white = aoc.vin_effervescent_blanc or aoc.vin_tranquille_blanc
+    red = aoc.still_red_wineor or aoc.sparkly_red_wine
+    white = aoc.still_white_wine or aoc.sparkly_white_wine
 
     max_id = AOC.query.order_by(AOC.id.desc()).first().id
     min_id = AOC.query.order_by(AOC.id.asc()).first().id
@@ -355,7 +354,7 @@ def quiz_grape_region(game_id, grape_id):
     if current_game.is_over:
         return redirect(url_for('main.new_game'))
 
-    grape = Cepage.query.filter_by(id=grape_id).first_or_404()
+    grape = Grape.query.filter_by(id=grape_id).first_or_404()
     grape_name = grape.name
     clean_vineyards = clean_vineyard(grape.vignobles)
     list_of_vineyards = [
@@ -385,7 +384,7 @@ def quiz_grape_region(game_id, grape_id):
 
     # si les informations ne sont pas présentes on change de cépage
     if len(list_of_positive_vineyards) == 0 or len(list_of_negative_vineyards) == 0:
-        grape_ids = Cepage.query.with_entities(Cepage.id).all()
+        grape_ids = Grape.query.with_entities(Grape.id).all()
         return redirect(url_for('main.quiz_grape_region',
                                 grape_id=random.choice(grape_ids)[0],
                                 game_id=current_game.id))
@@ -400,7 +399,7 @@ def quiz_grape_region(game_id, grape_id):
 
         if clicked_is_positive == 'True':
             right_answer(current_game)
-            grape_ids = Cepage.query.with_entities(Cepage.id).all()
+            grape_ids = Grape.query.with_entities(Grape.id).all()
             return redirect(url_for('main.quiz_grape_region',
                                     grape_id=random.choice(grape_ids)[0],
                                     game_id=current_game.id))
@@ -483,9 +482,9 @@ def quiz_aoc_color(game_id, aoc_id):
 
     # getting the grape
     random_aoc = AOC.query.filter_by(id=aoc_id).first_or_404()
-    red = random_aoc.vin_effervescent_rouge or random_aoc.vin_tranquille_rouge
-    white = random_aoc.vin_effervescent_blanc or random_aoc.vin_tranquille_blanc or \
-            random_aoc.vin_effervescent_rose or random_aoc.vin_tranquille_rose
+    red = random_aoc.still_red_wine or random_aoc.sparkly_red_wine
+    white = random_aoc.stil_white_wine or random_aoc.sparkly_white_wine or \
+            random_aoc.still_rose_wine or random_aoc.sparkly_rose_wine
     aoc_name = random_aoc.name
 
     if request.method == 'POST':
@@ -522,4 +521,4 @@ def quiz_aoc_color(game_id, aoc_id):
 @bp.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
-    return render_template('admin.html')
+    return "Bonjour le monde"
