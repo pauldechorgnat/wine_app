@@ -212,7 +212,8 @@ def wrong_answer(game):
     game.is_over = True
     db.session.add(game)
     post = Post(
-        body="I just scored {} at {}!".format(game.score, game.game_type),
+        body="I just scored {} at {}!".format(game.score,
+                                              current_app.config['GAMES_TO_NAMES'][game.game_type]),
         author=current_user,
         language='en')
     db.session.add(post)
