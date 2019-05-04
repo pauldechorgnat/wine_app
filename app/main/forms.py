@@ -31,7 +31,7 @@ class PostForm(FlaskForm):
 class NewGameForm(FlaskForm):
     game_type = SelectField(_('Game type'),
                             choices=[('quiz_grape_color', _('Grape Color Quiz')),
-                                     ('quiz_grape_region', _(' Grape Region Quiz')),
+                                     ('quiz_grape_region', _('Grape Region Quiz')),
                                      ('quiz_aoc_color', _('AOC Color Quiz')),
                                      ('quiz_aoc_region', _('AOC Region Quiz'))])
     submit = SubmitField(_('Start a game'))

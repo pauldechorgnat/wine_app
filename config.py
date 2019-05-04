@@ -8,7 +8,7 @@ load_dotenv(os.path.join(basedir, '.env'))
 class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'clef_secrete-de-Paul'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(basedir, 'app.db')
+                              'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAIL_SERVER = os.environ.get('MAIL_SERVER')
     MAIL_PORT = int(os.environ.get('MAIL_PORT') or 25)
@@ -22,3 +22,8 @@ class Config(object):
     GRAPES_PER_PAGE = 10
     AOC_PER_PAGE = 10
 
+    GAMES_TO_NAMES = dict([('quiz_grape_color', 'Grape Color Quiz'),
+                           ('quiz_grape_region', 'Grape Region Quiz'),
+                           ('quiz_aoc_color', 'AOC Color Quiz'),
+                           ('quiz_aoc_region', 'AOC Region Quiz')])
+    NAMES_TO_GAMES = {name: game for game, name in GAMES_TO_NAMES.items()}
