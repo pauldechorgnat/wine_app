@@ -21,6 +21,7 @@ class Config(object):
     POSTS_PER_PAGE = 25
     GRAPES_PER_PAGE = 10
     AOC_PER_PAGE = 10
+    USERS_PER_PAGE = 5
 
     GAMES_TO_NAMES = dict([('quiz_grape_color', 'Grape Color Quiz'),
                            ('quiz_grape_region', 'Grape Region Quiz'),

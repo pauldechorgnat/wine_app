@@ -51,7 +51,6 @@ class User(UserMixin, db.Model):
             self.followed.remove(user_)
 
     def is_following(self, user_):
-        print(user_)
         return self.followed.filter(
             followers.c.followed_id == user_.id).count() > 0
 
@@ -130,3 +129,23 @@ class Game(db.Model):
 
     def increment_score(self):
         self.score += 1
+
+
+def get_player_stats(user_):
+    games = Game.query.filter_by(player_id=user_.id).all()
+    games_per_type = {}
+    for game_type, game_name in current_app.config['GAMES_TO_NAMES'].items():
+        games_per_type[(game_type, game_name)] = [game for game in games if game.game_type == game_type]
+
+    summary_per_type = []
+    for (game_type, game_name), games in games_per_type.items():
+        summary_per_type.append(
+            {
+                'name': game_name,
+                'type': game_type,
+                'nb_played': len(games),
+                'best': max(games, key=lambda x: x.score).score if len(games) > 0 else '-'
+            }
+        )
+
+        return summary_per_type, len(games)

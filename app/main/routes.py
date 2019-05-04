@@ -8,7 +8,7 @@ from flask_babel import _, get_locale
 from guess_language import guess_language
 from app import db
 from app.main.forms import EditProfileForm, PostForm, NewGameForm
-from app.models import User, Post, Grape, AOC, Game
+from app.models import User, Post, Grape, AOC, Game, get_player_stats
 from app.translate import translate
 from app.main import bp
 import random
@@ -99,22 +99,8 @@ def explore_aocs():
 def user(username):
     # collecting the user
     user_ = User.query.filter_by(username=username).first_or_404()
-    # colleting his/her games
-    games = Game.query.filter_by(player_id=user_.id).all()
-    games_per_type = {}
-    for game_type, game_name in current_app.config['GAMES_TO_NAMES'].items():
-        games_per_type[(game_type, game_name)] = [game for game in games if game.game_type == game_type]
 
-    summary_per_type = []
-    for (game_type, game_name), games in games_per_type.items():
-        summary_per_type.append(
-            {
-                'name': game_name,
-                'type': game_type,
-                'nb_played': len(games),
-                'best': max(games, key=lambda x: x.score).score if len(games) > 0 else _('-')
-            }
-        )
+    summary_per_type, nb_played_games = get_player_stats(user_)
 
     page = request.args.get('page', 1, type=int)
     posts = user_.posts.order_by(Post.timestamp.desc()).paginate(
@@ -124,7 +110,7 @@ def user(username):
     prev_url = url_for('main.user', username=user_.username,
                        page=posts.prev_num) if posts.has_prev else None
     return render_template('user.html', user=user_, posts=posts.items,
-                           next_url=next_url, prev_url=prev_url, nb_played_games=len(games),
+                           next_url=next_url, prev_url=prev_url, nb_played_games=nb_played_games,
                            games_data=summary_per_type)
 
 
@@ -521,5 +507,24 @@ def quiz_aoc_color(game_id, aoc_id):
 @bp.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
-
     return "Bonjour le monde"
+
+
+@bp.route('/explore_users', methods=['GET', 'POST'])
+@login_required
+def explore_users():
+    page = request.args.get('page', 1, type=int)
+    users = User.query.order_by(User.id.asc()).paginate(
+        page, current_app.config['USERS_PER_PAGE'], False)
+    next_url = url_for('main.explore_users', page=users.next_num) \
+        if users.has_next else None
+    prev_url = url_for('main.explore_users', page=users.prev_num) \
+        if users.has_prev else None
+
+    games_stats = {u.id: get_player_stats(u) for u in users.items}
+
+    return render_template('explore_users.html',
+                           users=users.items,
+                           games_stats=games_stats,
+                           prev_url=prev_url,
+                           next_url=next_url)
