@@ -7,7 +7,7 @@ from flask_login import current_user, login_required
 from flask_babel import _, get_locale
 from guess_language import guess_language
 from app import db
-from app.main.forms import EditProfileForm, PostForm, NewGameForm
+from app.main.forms import EditProfileForm, PostForm, NewGameForm, EditUserForm
 from app.models import User, Post, Grape, AOC, Game, get_player_stats
 from app.translate import translate
 from app.main import bp
@@ -507,6 +507,22 @@ def delete_user(username):
         flash(_('User {} deleted'.format(username)))
         return redirect(url_for('main.explore_users'))
 
+
+@bp.route('/safe_delete_user/<username>', methods=['GET', 'POST'])
+@login_required
+def safe_delete_user(username):
+    return render_template('confirm_delete_user.html', username=username)
+
+
+@bp.route('/edit_user/<username>', methods=['GET', 'POST'])
+@login_required
+def edit_user(username):
+    if current_user.username != 'admin':
+        return redirect(url_for('main.index'))
+    else:
+        form = EditUserForm(original_username=username)
+        user = User.query.filter_by(username=username).first_or_404()
+        return render_template('edit_user.html', form=form, user=user)
 
 
 @bp.route('/admin', methods=['GET', 'POST'])

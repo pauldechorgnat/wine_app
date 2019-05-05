@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+
+{% block app_content %}
+<table class="table">
+    <tr>
+        <td>
+            <img src="/static/warning.png" height="50%">
+        </td>
+        <td>
+            <h1>You are about to delete a user.</h1>
+            <h2>This action is not reversible.</h2>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <a class="btn btn-default" href="{{ url_for('main.delete_user', username=username) }}">Confirm</a>
+        </td>
+        <td>
+            <a class="btn btn-default" href="{{ url_for('main.edit_user', username=username) }}">Cancel</a>
+
+        </td>
+    </tr>
+</table>
+
+
+{% endblock %}

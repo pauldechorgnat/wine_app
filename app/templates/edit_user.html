@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+
+
+{% block app_content %}
+    <h1>Edit user {{ user.username }}</h1>
+    <a href="{{url_for('main.safe_delete_user', username=user.username)}}">Delete user</a>
+    <table class="table">
+        <tr>
+        <td style="margin:2.5%;">
+            <img style="height:200px;" src="{{ user.avatar(200) }}">
+        </td>
+        <td style="margin:2.5%;">
+            <h2>User name</h2>
+            {{ form.username(rows="1", value=user.username, class="form-control") }}
+            <h2>Email</h2>
+            {{ form.email(rows="1", value=user.email, class="form-control") }}
+        </td>
+        <td style="margin:2.5%">
+            <h2>{{ _('Password') }}</h2>
+            {{ form.password(class="form-control") }}
+            <h2>{{ _('Repeat Password') }}</h2>
+            {{ form.password2(class="form-control") }}
+        </td>
+        </tr>
+
+    </table>
+
+    <h2>About me</h2>
+    {{ form.about_me(class="form-control") }}
+    <br>
+    {{ form.submit(class="btn btn-default") }}
+
+{% endblock %}
