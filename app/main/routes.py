@@ -548,7 +548,17 @@ def edit_user(username):
         return render_template('edit_user.html', form=form, user=user_)
 
 
-@bp.route('/admin', methods=['GET', 'POST'])
+@bp.route('/explore_posts', methods=['GET', 'POST'])
 @login_required
-def admin():
-    return "Bonjour le monde"
+def explore_posts():
+    if current_user.username != 'admin':
+        return redirect(url_for('main.index'))
+    page = request.args.get('page', 1, type=int)
+    posts = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page, current_app.config['POSTS_PER_PAGE'], False)
+    next_url = url_for('main.explore_posts',
+                       page=posts.next_num) if posts.has_next else None
+    prev_url = url_for('main.explore_posts',
+                       page=posts.prev_num) if posts.has_prev else None
+    return render_template('explore_posts.html', posts=posts.items,
+                           next_url=next_url, prev_url=prev_url)

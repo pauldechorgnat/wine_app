@@ -34,12 +34,14 @@
                         <a class="dropdown-item" href="{{ url_for('main.explore_aocs') }}">Explore AOCs</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ url_for('main.explore_users') }}">Explore users</a>
+                        {% if current_user.username == 'admin' %}
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{{ url_for('main.explore_posts') }}">Explore posts</a>
+                        {% endif %}
                     </div>
                 </li>
                 <li><a href="{{ url_for('main.new_game') }}">{{ _('New game') }}</a></li>
-                {% if current_user.username == 'admin' %}
-                <li><a href="{{ url_for('main.admin') }}">{{ _('Admin') }}</a></li>
-                {% endif %}
+
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 {% if current_user.is_anonymous %}
@@ -86,6 +88,7 @@
                 $(destElem).text("{{ _('Error: Could not contact server.') }}");
             });
         }
+
 
 
 
