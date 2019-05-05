@@ -37,24 +37,18 @@ class NewGameForm(FlaskForm):
     submit = SubmitField(_('Start a game'))
 
 
-# class EditGrapeForm(FlaskForm):
-#     id = IntegerField('ID')
-#     name = TextAreaField('Name')
-#     regions = SelectField('Regions', choices=[('quiz_grape_color', _('Grape Color Quiz')),
-#                                      ('quiz_grape_region', _('Grape Region Quiz')),
-#                                      ('quiz_aoc_color', _('AOC Color Quiz')),
-#                                      ('quiz_aoc_region', _('AOC Region Quiz'))])
-#     vineyards = RadioField('Vineyards', choices=[('quiz_grape_color', _('Grape Color Quiz')),
-#                                      ('quiz_grape_region', _('Grape Region Quiz')),
-#                                      ('quiz_aoc_color', _('AOC Color Quiz')),
-#                                      ('quiz_aoc_region', _('AOC Region Quiz'))])
-#     departments = SelectMultipleField('Departments', choices=[('quiz_grape_color', _('Grape Color Quiz')),
-#                                      ('quiz_grape_region', _('Grape Region Quiz')),
-#                                      ('quiz_aoc_color', _('AOC Color Quiz')),
-#                                      ('quiz_aoc_region', _('AOC Region Quiz'))])
-#     area_fr = IntegerField('Area in France')
-#     area_world = IntegerField('Area in the world')
-#     red = BooleanField('is red')
-#     submit = SubmitField()
+class EditGrapeForm(FlaskForm):
+    id = IntegerField('ID')
+    name = TextAreaField('Name')
+    regions = TextAreaField('Regions')
+    vineyards = RadioField('Vineyards', choices=[('quiz_grape_color', _('Grape Color Quiz')),
+                                     ('quiz_grape_region', _('Grape Region Quiz')),
+                                     ('quiz_aoc_color', _('AOC Color Quiz')),
+                                     ('quiz_aoc_region', _('AOC Region Quiz'))])
+    departments =TextAreaField('Departments')
+    area_fr = IntegerField('Area in France')
+    area_world = IntegerField('Area in the world')
+    red = BooleanField('is red')
+    submit = SubmitField()
 
 

@@ -28,3 +28,20 @@ class Config(object):
                            ('quiz_aoc_color', 'AOC Color Quiz'),
                            ('quiz_aoc_region', 'AOC Region Quiz')])
     NAMES_TO_GAMES = {name: game for game, name in GAMES_TO_NAMES.items()}
+
+    VINEYARDS = [
+        'alsace',
+        'armagnac',
+        'bordeaux',
+        'bourgogne',
+        'champagne',
+        'cognac',
+        'corse',
+        'jura',
+        'languedoc',
+        'loire',
+        'provence',
+        'rhone',
+        'savoie',
+        'sud-ouest',
+    ]

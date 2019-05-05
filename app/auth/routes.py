@@ -33,9 +33,10 @@ def login():
 @bp.route('/login_as_anonymous_user')
 def login_as_anonymous_user():
     if not current_user.is_authenticated:
-        id = len(User.query.all()) + 1
-        anonymous_user = User(id=id,
-                              username='anonymous user {}'.format(id),
+        id_ =User.query.with_entities(User.id).all()
+        id_ = max([i[0] for i in id_]) + 1
+        anonymous_user = User(id=id_,
+                              username='anonymous user {}'.format(id_),
                               email=''.join(random.sample(string.printable, k=10)))
         anonymous_user.set_password('')
         db.session.add(anonymous_user)

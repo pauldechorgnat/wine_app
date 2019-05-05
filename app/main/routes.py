@@ -343,22 +343,8 @@ def quiz_grape_region(game_id, grape_id):
     grape = Grape.query.filter_by(id=grape_id).first_or_404()
     grape_name = grape.name
     clean_vineyards = clean_vineyard(grape.vineyards)
-    list_of_vineyards = [
-        'alsace',
-        'armagnac',
-        'bordeaux',
-        'bourgogne',
-        'champagne',
-        'cognac',
-        'corse',
-        'jura',
-        'languedoc',
-        'loire',
-        'provence',
-        'rhone',
-        'savoie',
-        'sud-ouest',
-    ]
+    list_of_vineyards = current_app.config['VINEYARDS']
+
     list_of_positive_vineyards = []
     list_of_negative_vineyards = []
 
@@ -414,22 +400,7 @@ def quiz_aoc_region(game_id, aoc_id):
     aoc_name = aoc.name.split(' ou')[0]
     aoc_vineyard = aoc.vineyard
 
-    list_of_vineyards = [
-        'alsace',
-        'armagnac',
-        'bordeaux',
-        'bourgogne',
-        'champagne',
-        'cognac',
-        'corse',
-        'jura',
-        'languedoc',
-        'loire',
-        'provence',
-        'rhone',
-        'savoie',
-        'sud-ouest',
-    ]
+    list_of_vineyards = current_app.config['VINEYARDS']
 
     positive_vineyard = clean_vineyard(aoc_vineyard)
 
@@ -504,12 +475,6 @@ def quiz_aoc_color(game_id, aoc_id):
                                grape_name=aoc_name)
 
 
-@bp.route('/admin', methods=['GET', 'POST'])
-@login_required
-def admin():
-    return "Bonjour le monde"
-
-
 @bp.route('/explore_users', methods=['GET', 'POST'])
 @login_required
 def explore_users():
@@ -528,3 +493,23 @@ def explore_users():
                            games_stats=games_stats,
                            prev_url=prev_url,
                            next_url=next_url)
+
+
+@bp.route('/delete_user/<username>', methods=['GET', 'POST'])
+@login_required
+def delete_user(username):
+    if current_user.username != 'admin':
+        return redirect(url_for('main.index'))
+    else:
+        user_to_delete = User.query.filter_by(username=username).first_or_404()
+        db.session.delete(user_to_delete)
+        db.session.commit()
+        flash(_('User {} deleted'.format(username)))
+        return redirect(url_for('main.explore_users'))
+
+
+
+@bp.route('/admin', methods=['GET', 'POST'])
+@login_required
+def admin():
+    return "Bonjour le monde"
