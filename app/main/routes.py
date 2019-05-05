@@ -521,8 +521,20 @@ def edit_user(username):
         return redirect(url_for('main.index'))
     else:
         form = EditUserForm(original_username=username)
-        user = User.query.filter_by(username=username).first_or_404()
-        return render_template('edit_user.html', form=form, user=user)
+
+        user_ = User.query.filter_by(username=username).first_or_404()
+        if form.validate_on_submit():
+            db.session.delete(user_)
+            if form.username.data != '':
+                user_.username = form.username.data
+            if form.email.data != '':
+                user_.email = form.email.data
+            if form.password.data != '':
+                user_.set_password(form.password.data)
+            db.session.add(user_)
+            db.session.commit()
+            return redirect(url_for('main.user', username=user_.username))
+        return render_template('edit_user.html', form=form, user=user_)
 
 
 @bp.route('/admin', methods=['GET', 'POST'])

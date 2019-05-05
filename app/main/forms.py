@@ -55,11 +55,10 @@ class EditGrapeForm(FlaskForm):
 
 class EditUserForm(FlaskForm):
     username = TextAreaField(label='Username', default='')
-    email = TextAreaField(label=_l('Email'), default='', validators=[Email()])
-    password = PasswordField(_l('Password'), default='', validators=[Length(8)])
+    email = TextAreaField(label=_l('Email'), default='')
+    password = PasswordField(_l('Password'), default='')
     password2 = PasswordField(
-        _l('Repeat Password'),  default='', validators=[DataRequired(),
-                                           EqualTo('password')])
+        _l('Repeat Password'),  default='', validators=[EqualTo('password')])
     about_me = TextAreaField(label=_l('About me'), default='')
     submit = SubmitField(_('Edit User'))
 

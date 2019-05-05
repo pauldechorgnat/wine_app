@@ -2,34 +2,39 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 
-
 {% block app_content %}
-    <h1>Edit user {{ user.username }}</h1>
-    <a href="{{url_for('main.safe_delete_user', username=user.username)}}">Delete user</a>
+<h1>Edit user : {{ user.username }}</h1>
+<a class="btn btn-default" href="{{url_for('main.safe_delete_user', username=user.username)}}">Delete user</a>
+<br>
+<br>
+<form method="post">
     <table class="table">
         <tr>
-        <td style="margin:2.5%;">
-            <img style="height:200px;" src="{{ user.avatar(200) }}">
-        </td>
-        <td style="margin:2.5%;">
-            <h2>User name</h2>
-            {{ form.username(rows="1", value=user.username, class="form-control") }}
-            <h2>Email</h2>
-            {{ form.email(rows="1", value=user.email, class="form-control") }}
-        </td>
-        <td style="margin:2.5%">
-            <h2>{{ _('Password') }}</h2>
-            {{ form.password(class="form-control") }}
-            <h2>{{ _('Repeat Password') }}</h2>
-            {{ form.password2(class="form-control") }}
-        </td>
+            <td style="margin:2.5%;">
+                <img style="height:200px;" src="{{ user.avatar(200) }}"
+                     onclick="window.location='{{ url_for('main.user', username=user.username) }}'">
+            </td>
+            <td style="margin:2.5%;">
+                <h2>User name</h2>
+                {{ form.username(rows="1", placeholder=user.username, class="form-control") }}
+                <h2>Email</h2>
+                {{ form.email(rows="1", placeholder=user.email, class="form-control") }}
+            </td>
+            <td style="margin:2.5%">
+                <h2>{{ _('Password') }}</h2>
+                {{ form.password(class="form-control") }}
+                <h2>{{ _('Repeat Password') }}</h2>
+                {{ form.password2(class="form-control") }}
+            </td>
         </tr>
 
     </table>
 
     <h2>About me</h2>
-    {{ form.about_me(class="form-control") }}
+    {{ form.about_me(class="form-control", placeholder=user.about_me) }}
     <br>
+    {{ form.csrf_token() }}
+    {{ form.hidden_tag() }}
     {{ form.submit(class="btn btn-default") }}
-
+</form>
 {% endblock %}
