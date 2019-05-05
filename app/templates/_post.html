@@ -26,5 +26,11 @@
                 </span>
                 {% endif %}
             </td>
+            {% if current_user.username == 'admin' or current_user.username == post.author.username %}
+            <td style="width:20%">
+
+                <a class="btn btn-default" href="{{ url_for('main.delete_post', post_id=post.id) }}">Delete Post</a>
+            </td>
+            {% endif %}
         </tr>
     </table>

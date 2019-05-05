@@ -514,6 +514,15 @@ def safe_delete_user(username):
     return render_template('confirm_delete_user.html', username=username)
 
 
+@bp.route('/delete_post/<post_id>', methods=['GET', 'POST'])
+@login_required
+def delete_post(post_id):
+    post_to_delete = Post.query.filter_by(id=post_id).first_or_404()
+    db.session.delete(post_to_delete)
+    db.session.commit()
+    return redirect(request.referrer)
+
+
 @bp.route('/edit_user/<username>', methods=['GET', 'POST'])
 @login_required
 def edit_user(username):
