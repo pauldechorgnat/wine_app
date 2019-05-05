@@ -144,7 +144,8 @@ def follow(username):
     current_user.follow(user_)
     db.session.commit()
     flash(_('You are following %(username)s!', username=username))
-    return redirect(url_for('main.user', username=username))
+    # return redirect(url_for('main.user', username=username))
+    return redirect(request.referrer)
 
 
 @bp.route('/unfollow/<username>')
@@ -160,7 +161,8 @@ def unfollow(username):
     current_user.unfollow(user_)
     db.session.commit()
     flash(_('You are not following %(username)s.', username=username))
-    return redirect(url_for('main.user', username=username))
+    # return redirect(url_for('main.user', username=username))
+    return redirect(request.referrer)
 
 
 @bp.route('/translate', methods=['POST'])
